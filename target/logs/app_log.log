@@ -1,0 +1,60 @@
+2026-05-13 08:23:08.825 [main] INFO  c.e.club.ClubManagementApplication - Starting ClubManagementApplication using Java 25.0.1 with PID 85688 (D:\Ideaworkspace\club-management\target\classes started by 33480 in D:\Ideaworkspace\club-management)
+2026-05-13 08:23:08.827 [main] INFO  c.e.club.ClubManagementApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-13 08:23:09.426 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-05-13 08:23:09.436 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-05-13 08:23:09.437 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-13 08:23:09.437 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-13 08:23:09.484 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 622 ms
+2026-05-13 08:23:09.934 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-05-13 08:23:09.945 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-05-13 08:23:09.947 [main] INFO  c.e.club.ClubManagementApplication - Started ClubManagementApplication in 1.373 seconds (process running for 1.839)
+2026-05-13 08:23:26.204 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-13 08:23:26.204 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-05-13 08:23:26.205 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2026-05-13 08:23:34.205 [http-nio-8080-exec-4] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-05-13 08:23:34.307 [http-nio-8080-exec-4] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5307eb9f
+2026-05-13 08:23:34.308 [http-nio-8080-exec-4] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-05-13 08:27:36.083 [SpringApplicationShutdownHook] INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-13 08:27:36.087 [tomcat-shutdown] INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-05-13 08:27:36.089 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-05-13 08:27:36.095 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-05-13 08:27:38.931 [main] INFO  c.e.club.ClubManagementApplication - Starting ClubManagementApplication using Java 25.0.1 with PID 85788 (D:\Ideaworkspace\club-management\target\classes started by 33480 in D:\Ideaworkspace\club-management)
+2026-05-13 08:27:38.936 [main] INFO  c.e.club.ClubManagementApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-13 08:27:40.241 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-05-13 08:27:40.247 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-05-13 08:27:40.248 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-13 08:27:40.248 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-13 08:27:40.279 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 1324 ms
+2026-05-13 08:27:40.606 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-05-13 08:27:41.923 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-05-13 08:27:41.926 [main] INFO  c.e.club.ClubManagementApplication - Started ClubManagementApplication in 3.178 seconds (process running for 3.592)
+2026-05-13 08:27:44.419 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-13 08:27:44.419 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-05-13 08:27:44.421 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2026-05-13 08:27:45.255 [http-nio-8080-exec-5] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-05-13 08:27:45.914 [http-nio-8080-exec-5] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@57835f85
+2026-05-13 08:27:45.915 [http-nio-8080-exec-5] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-05-13 08:30:17.167 [SpringApplicationShutdownHook] INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-13 08:30:17.172 [tomcat-shutdown] INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-05-13 08:30:17.174 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-05-13 08:30:17.178 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-05-13 08:30:18.669 [main] INFO  c.e.club.ClubManagementApplication - Starting ClubManagementApplication using Java 25.0.1 with PID 84164 (D:\Ideaworkspace\club-management\target\classes started by 33480 in D:\Ideaworkspace\club-management)
+2026-05-13 08:30:18.671 [main] INFO  c.e.club.ClubManagementApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-13 08:30:19.135 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-05-13 08:30:19.142 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-05-13 08:30:19.142 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-13 08:30:19.143 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-13 08:30:19.177 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 485 ms
+2026-05-13 08:30:19.512 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-05-13 08:30:19.522 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-05-13 08:30:19.526 [main] INFO  c.e.club.ClubManagementApplication - Started ClubManagementApplication in 1.046 seconds (process running for 1.469)
+2026-05-13 08:30:23.673 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-13 08:30:23.674 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-05-13 08:30:23.675 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2026-05-13 08:30:24.651 [http-nio-8080-exec-4] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-05-13 08:30:24.740 [http-nio-8080-exec-4] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4cfea225
+2026-05-13 08:30:24.741 [http-nio-8080-exec-4] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-05-13 08:41:47.695 [SpringApplicationShutdownHook] INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-13 08:41:47.700 [tomcat-shutdown] INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-05-13 08:41:47.702 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-05-13 08:41:47.707 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

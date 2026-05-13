@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>社团管理系统-首页</title>
+    <link href="bootstrap5/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="bootstrap5/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            background: #f0f6ff;
+            font-family: 'Microsoft YaHei', sans-serif
+        }
+
+        .navbar {
+            background: #4da3ff;
+            color: #fff
+        }
+
+        .sidebar {
+            width: 220px;
+            background: #fff;
+            min-height: 100vh;
+            box-shadow: 2px 0 6px rgba(0, 0, 0, .05)
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            color: #333
+        }
+
+        .menu-item:hover {
+            background: #e6f2ff
+        }
+
+        .menu-item.active {
+            background: #e6f2ff;
+            color: #4da3ff;
+            font-weight: bold
+        }
+
+        .card-box {
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .05)
+        }
+
+        .title-blue {
+            color: #4da3ff
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <nav class="navbar px-3 d-flex align-items-center">
+        <span class="fw-bold"><i class="bi bi-people-fill"></i> 社团管理系统</span>
+        <div class="ms-auto">
+            <span v-if="user.username">你好，{{user.username}}</span>
+            <button class="btn btn-outline-light btn-sm ms-2" @click="goLogin" v-if="!user.username">登录</button>
+            <a class="btn btn-outline-light btn-sm ms-2" href="login.html" v-if="!user.username">登录</a>
+        </div>
+    </nav>
+    <div class="d-flex">
+        <div class="sidebar">
+            <div class="menu-item active">首页</div>
+            <div class="menu-item">通知公告</div>
+            <div class="menu-item">招新管理</div>
+            <div class="menu-item">报名审核</div>
+            <div class="menu-item">活动管理</div>
+            <div class="menu-item">成员管理</div>
+            <div class="menu-item">公告管理</div>
+            <div class="menu-item">数据展示</div>
+        </div>
+        <div class="flex-fill p-4">
+            <div class="mb-4"><h4 class="title-blue">欢迎使用社团管理系统</h4></div>
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card card-box p-3 text-center"><h5>社团总数</h5>
+                        <h2 class="text-primary">{{stats.club}}</h2></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-box p-3 text-center"><h5>活动数量</h5>
+                        <h2 class="text-success">{{stats.activity}}</h2></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-box p-3 text-center"><h5>成员总数</h5>
+                        <h2 class="text-warning">{{stats.member}}</h2></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-box p-3 text-center"><h5>报名数量</h5>
+                        <h2 class="text-danger">{{stats.apply}}</h2></div>
+                </div>
+            </div>
+            <div class="card card-box p-3 mb-4">
+                <h5 class="title-blue"><i class="bi bi-bell"></i> 最新公告</h5>
+                <ul class="mt-3">
+                    <li v-for="n in notices.slice(0,5)" :key="n.id">{{n.title}} <small
+                            class="text-muted">{{n.createTime}}</small></li>
+                </ul>
+                <div v-if="notices.length===0" class="text-muted">暂无公告</div>
+            </div>
+            <div class="card card-box p-3">
+                <h5 class="title-blue"><i class="bi bi-calendar-event"></i> 最近活动</h5>
+                <ul class="mt-3">
+                    <li v-for="a in activities.slice(0,5)" :key="a.id">{{a.activityName}} - {{a.startTime}}</li>
+                </ul>
+                <div v-if="activities.length===0" class="text-muted">暂无活动</div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const {createApp} = Vue
+    createApp({
+        data() {
+            return {user: {}, stats: {club: 0, activity: 0, member: 0, apply: 0}, notices: [], activities: []}
+        },
+        async mounted() {
+            const u = localStorage.getItem('user');
+            if (u) this.user = JSON.parse(u)
+            try {
+                const [clubs, acts, notices] = await Promise.all([
+                    axios.get('/api/club/list'),
+                    axios.get('/api/activity/list'),
+                    axios.get('/api/notice/list')
+                ])
+                const clubData = clubs.data.data || [];
+                const actData = acts.data.data || [];
+                const noticeData = notices.data.data || []
+                this.stats.club = clubData.length;
+                this.stats.activity = actData.length
+                this.stats.member = clubData.reduce((s, c) => s + (c.memberCount || 0), 0)
+                this.stats.apply = 0
+                this.notices = noticeData;
+                this.activities = actData
+            } catch (e) {
+                console.error(e)
+            }
+        },
+        methods: {
+            goLogin() {
+                window.location.href = 'login.html'
+            }
+        }
+    }).mount('#app')
+</script>
+</body>
+</html>

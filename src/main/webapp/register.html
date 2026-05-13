@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册</title>
+    <link href="bootstrap5/bootstrap.min.css" rel="stylesheet">
+    <script src="bootstrap5/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #f5f7fa
+        }
+
+        .left-panel {
+            background: linear-gradient(135deg, #4e73df, #36b9cc);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .card-box {
+            width: 430px;
+            padding: 40px;
+            border-radius: 20px;
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .1)
+        }
+
+        .btn {
+            border-radius: 10px
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="container-fluid" style="height:100vh">
+    <div class="row h-100">
+        <div class="col-md-7 d-none d-md-flex left-panel">
+            <div class="text-center"><h1>Neuedu</h1>
+                <p>社团管理平台</p></div>
+        </div>
+        <div class="col-md-5 d-flex align-items-center justify-content-center">
+            <div class="card-box">
+                <h4 class="text-center">欢迎加入</h4>
+                <h2 class="text-center mb-4 fw-bold">用户注册</h2>
+                <div class="mb-3"><input class="form-control" placeholder="用户名" v-model="username"></div>
+                <div class="mb-3"><input class="form-control" placeholder="真实姓名" v-model="realName"></div>
+                <div class="mb-3"><input class="form-control" placeholder="学号" v-model="studentNo"></div>
+                <div class="mb-3">
+                    <select class="form-control" v-model="gender">
+                        <option value="">请选择性别</option>
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <div class="mb-3"><input class="form-control" placeholder="手机号" v-model="phone"></div>
+                <div class="mb-3"><input type="email" class="form-control" placeholder="邮箱" v-model="email"></div>
+                <div class="mb-3"><input type="password" class="form-control" placeholder="密码" v-model="password">
+                </div>
+                <div class="mb-3"><input type="password" class="form-control" placeholder="确认密码"
+                                         v-model="confirmPassword"></div>
+                <button class="btn btn-success w-100" @click="register">注册</button>
+                <div class="text-center mt-3"><span>已有账号？</span><a href="login.html"
+                                                                       class="text-primary">返回登录</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const {createApp} = Vue
+    createApp({
+        data() {
+            return {
+                username: '',
+                realName: '',
+                studentNo: '',
+                gender: '',
+                phone: '',
+                email: '',
+                password: '',
+                confirmPassword: ''
+            }
+        },
+        methods: {
+            register() {
+                if (!this.username || !this.realName || !this.phone || !this.email || !this.password) {
+                    alert('请填写完整信息');
+                    return
+                }
+                if (this.password !== this.confirmPassword) {
+                    alert('两次密码不一致');
+                    return
+                }
+                axios.post('/api/user/register', {
+                    username: this.username,
+                    realName: this.realName,
+                    studentNo: this.studentNo,
+                    gender: this.gender,
+                    phone: this.phone,
+                    email: this.email,
+                    password: this.password
+                }).then(res => {
+                    if (res.data.code === 200) {
+                        alert('注册成功，请登录');
+                        window.location.href = 'login.html'
+                    } else {
+                        alert(res.data.msg || res.data.message)
+                    }
+                }).catch(err => {
+                    console.error(err);
+                    alert('请求失败')
+                })
+            }
+        }
+    }).mount('#app')
+</script>
+</body>
+</html>

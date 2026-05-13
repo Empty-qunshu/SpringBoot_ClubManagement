@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>学生端 - 社团管理平台</title>
+    <link href="bootstrap5/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="bootstrap5/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        :root {
+            --primary: #4e73df;
+            --sidebar-w: 240px
+        }
+
+        body {
+            margin: 0;
+            background: #f5f7fa;
+            font-family: 'Microsoft YaHei', sans-serif
+        }
+
+        .navbar {
+            background: var(--primary);
+            color: #fff;
+            height: 56px
+        }
+
+        .sidebar {
+            width: var(--sidebar-w);
+            background: #fff;
+            min-height: calc(100vh - 56px);
+            box-shadow: 2px 0 8px rgba(0, 0, 0, .06);
+            position: fixed;
+            top: 56px;
+            left: 0;
+            z-index: 100
+        }
+
+        .sidebar .nav-link {
+            color: #555;
+            padding: 12px 20px;
+            border-left: 3px solid transparent;
+            transition: .2s;
+            cursor: pointer
+        }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: #f0f4ff;
+            color: var(--primary);
+            border-left-color: var(--primary)
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 8px
+        }
+
+        .main {
+            margin-left: var(--sidebar-w);
+            padding: 24px;
+            min-height: calc(100vh - 56px)
+        }
+
+        .stat-card {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+            transition: .2s
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .1)
+        }
+
+        .stat-card .icon-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px
+        }
+
+        .card {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, .06)
+        }
+
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .4);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .15)
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <nav class="navbar px-3 d-flex align-items-center">
+        <span class="fw-bold fs-5"><i class="bi bi-people-fill"></i> 社团管理平台</span>
+        <div class="ms-auto d-flex align-items-center">
+            <span class="me-3"><i class="bi bi-person-circle"></i> {{user.realName || user.username}}</span>
+            <button class="btn btn-outline-light btn-sm" @click="logout">退出登录</button>
+        </div>
+    </nav>
+    <div class="sidebar">
+        <div class="p-3 border-bottom"><small class="text-muted">学生端菜单</small></div>
+        <div class="nav-link" :class="{active:page==='home'}" @click="page='home'"><i class="bi bi-house"></i> 首页
+        </div>
+        <div class="nav-link" :class="{active:page==='clubs'}" @click="page='clubs'"><i class="bi bi-building"></i> 社团列表
+        </div>
+        <div class="nav-link" :class="{active:page==='recruit'}" @click="page='recruit'"><i class="bi bi-megaphone"></i>
+            招新信息
+        </div>
+        <div class="nav-link" :class="{active:page==='activities'}" @click="page='activities'"><i
+                class="bi bi-calendar-event"></i> 活动列表
+        </div>
+        <div class="nav-link" :class="{active:page==='myApply'}" @click="page='myApply'"><i class="bi bi-send"></i> 我的申请
+        </div>
+        <div class="nav-link" :class="{active:page==='mySignup'}" @click="page='mySignup'"><i
+                class="bi bi-check2-circle"></i> 我的活动
+        </div>
+        <div class="nav-link" :class="{active:page==='myClubs'}" @click="page='myClubs'"><i class="bi bi-star"></i> 我的社团
+        </div>
+    </div>
+    <div class="main">
+
+        <div v-if="page==='home'">
+            <h4 class="mb-4">欢迎回来，{{user.realName || user.username}}</h4>
+            <div class="row">
+                <div class="col-md-3 mb-3" v-for="s in homeStats" :key="s.label">
+                    <div class="stat-card card p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-circle me-3" :style="{background:s.bg,color:s.color}"><i
+                                    :class="s.icon"></i></div>
+                            <div><small class="text-muted">{{s.label}}</small><h4 class="mb-0 mt-1">{{s.value}}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-3 mb-3"><h5><i class="bi bi-bell"></i> 最新公告</h5>
+                <div v-if="notices.length===0" class="text-muted">暂无公告</div>
+                <div v-for="n in notices.slice(0,5)" :key="n.id" class="py-2 border-bottom"><strong>{{n.title}}</strong><small
+                        class="text-muted ms-2">{{n.createTime}}</small></div>
+            </div>
+        </div>
+
+        <div v-if="page==='clubs'">
+            <h5 class="mb-3">全部社团</h5>
+            <div class="row">
+                <div class="col-md-4 mb-3" v-for="c in clubs" :key="c.id">
+                    <div class="card p-3 h-100">
+                        <h6>{{c.clubName}} <span class="badge bg-info">{{c.clubType}}</span></h6>
+                        <p class="text-muted small">{{c.clubDescription}}</p>
+                        <small>成员: {{c.memberCount}} | 地点: {{c.location}}</small>
+                    </div>
+                </div>
+                <div class="col-12 text-center text-muted" v-if="clubs.length===0">暂无社团数据</div>
+            </div>
+        </div>
+
+        <div v-if="page==='recruit'">
+            <h5 class="mb-3">正在招新</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3" v-for="r in recruitments" :key="r.id">
+                    <div class="card p-3">
+                        <div class="d-flex justify-content-between"><h6>{{r.title}}</h6><span class="badge bg-success"
+                                                                                              v-if="r.status===1">招新中</span><span
+                                class="badge bg-secondary" v-else>已结束</span></div>
+                        <p class="small text-muted">{{r.content}}</p>
+                        <p class="small"><strong>要求:</strong> {{r.requirement}}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small>已报名: {{r.currentCount}}/{{r.limitCount}}</small>
+                            <button class="btn btn-primary btn-sm" @click="openApply(r)" :disabled="r.status!==1">
+                                立即报名
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 text-center text-muted" v-if="recruitments.length===0">暂无招新信息</div>
+            </div>
+        </div>
+
+        <div v-if="page==='activities'">
+            <h5 class="mb-3">活动列表</h5>
+            <div class="row">
+                <div class="col-md-4 mb-3" v-for="a in activities" :key="a.id">
+                    <div class="card p-3">
+                        <h6>{{a.activityName}}</h6>
+                        <p class="small text-muted">{{a.description}}</p>
+                        <p class="small"><i class="bi bi-geo-alt"></i> {{a.location}} | <i class="bi bi-people"></i>
+                            {{a.currentPeople}}/{{a.maxPeople}}</p>
+                        <p class="small"><i class="bi bi-clock"></i> {{a.startTime}} ~ {{a.endTime}}</p>
+                        <span class="badge bg-warning" v-if="a.status===1">未开始</span>
+                        <span class="badge bg-primary" v-if="a.status===2">进行中</span>
+                        <span class="badge bg-secondary" v-if="a.status===3">已结束</span>
+                        <button class="btn btn-outline-primary btn-sm mt-2" @click="signupActivity(a)"
+                                :disabled="a.status===3">报名参加
+                        </button>
+                    </div>
+                </div>
+                <div class="col-12 text-center text-muted" v-if="activities.length===0">暂无活动</div>
+            </div>
+        </div>
+
+        <div v-if="page==='myApply'">
+            <h5 class="mb-3">我的社团申请</h5>
+            <table class="table table-hover" v-if="myApplies.length>0">
+                <thead>
+                <tr>
+                    <th>社团</th>
+                    <th>申请理由</th>
+                    <th>状态</th>
+                    <th>时间</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="a in myApplies" :key="a.id">
+                    <td>{{a.clubName || '社团' + a.clubId}}</td>
+                    <td class="small">{{a.applyReason}}</td>
+                    <td><span class="badge bg-warning" v-if="a.status===0">待审核</span><span class="badge bg-success"
+                                                                                              v-if="a.status===1">已通过</span><span
+                            class="badge bg-danger" v-if="a.status===2">已拒绝</span></td>
+                    <td class="small">{{a.applyTime}}</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="text-center text-muted" v-else>暂无申请记录</div>
+        </div>
+
+        <div v-if="page==='mySignup'">
+            <h5 class="mb-3">我的活动报名</h5>
+            <table class="table table-hover" v-if="mySignups.length>0">
+                <thead>
+                <tr>
+                    <th>活动</th>
+                    <th>报名时间</th>
+                    <th>签到</th>
+                    <th>状态</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="s in mySignups" :key="s.id">
+                    <td>{{s.activityName || '活动' + s.activityId}}</td>
+                    <td class="small">{{s.signupTime}}</td>
+                    <td><span class="badge bg-success" v-if="s.signStatus===1">已签到</span><span
+                            class="badge bg-warning" v-else>未签到</span></td>
+                    <td><span class="badge bg-success" v-if="s.status===1">有效</span><span class="badge bg-secondary"
+                                                                                            v-else>已取消</span></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="text-center text-muted" v-else>暂无活动报名</div>
+        </div>
+
+        <div v-if="page==='myClubs'">
+            <h5 class="mb-3">我的社团</h5>
+            <div class="row">
+                <div class="col-md-4 mb-3" v-for="mc in myClubs" :key="mc.member.id">
+                    <div class="card p-3">
+                        <h6>{{mc.club.clubName}}</h6>
+                        <p class="small text-muted">{{mc.club.clubDescription}}</p>
+                        <small>角色: <span class="badge bg-info" v-if="mc.member.memberRole===1">普通成员</span><span
+                                class="badge bg-primary" v-if="mc.member.memberRole===2">干部</span><span
+                                class="badge bg-warning" v-if="mc.member.memberRole===3">社长</span></small>
+                    </div>
+                </div>
+                <div class="col-12 text-center text-muted" v-if="myClubs.length===0">你还没有加入任何社团</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-overlay" v-if="showApplyModal" @click.self="showApplyModal=false">
+        <div class="modal-box">
+            <h5 class="mb-3">报名招新 - {{applyTarget.title}}</h5>
+            <div class="mb-3"><label>申请理由</label><textarea class="form-control" rows="3"
+                                                               v-model="applyForm.reason"></textarea></div>
+            <div class="mb-3"><label>个人优势</label><textarea class="form-control" rows="3"
+                                                               v-model="applyForm.strength"></textarea></div>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-secondary me-2" @click="showApplyModal=false">取消</button>
+                <button class="btn btn-primary" @click="submitApply">提交申请</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const {createApp} = Vue
+    createApp({
+        data() {
+            return {
+                user: {}, page: 'home',
+                clubs: [], recruitments: [], activities: [], notices: [],
+                myApplies: [], mySignups: [], myClubs: [],
+                homeStats: [],
+                showApplyModal: false, applyTarget: {}, applyForm: {reason: '', strength: ''}
+            }
+        },
+        async mounted() {
+            const u = localStorage.getItem('user')
+            if (!u) {
+                window.location.href = 'login.html';
+                return
+            }
+            this.user = JSON.parse(u)
+            await this.loadAll()
+        },
+        methods: {
+            async loadAll() {
+                try {
+                    const [clubs, recruit, acts, notices, applies, signups, myClubs] = await Promise.all([
+                        axios.get('/api/club/list'),
+                        axios.get('/api/recruitment/list'),
+                        axios.get('/api/activity/list'),
+                        axios.get('/api/notice/list'),
+                        axios.get('/api/apply/byUser/' + this.user.id),
+                        axios.get('/api/signup/byUser/' + this.user.id),
+                        axios.get('/api/member/myClubs/' + this.user.id)
+                    ])
+                    this.clubs = clubs.data.data || []
+                    this.recruitments = recruit.data.data || []
+                    this.activities = acts.data.data || []
+                    this.notices = notices.data.data || []
+                    this.myApplies = applies.data.data || []
+                    this.mySignups = signups.data.data || []
+                    this.myClubs = myClubs.data.data || []
+                    this.homeStats = [
+                        {
+                            label: '社团总数',
+                            value: this.clubs.length,
+                            icon: 'bi-building',
+                            bg: '#e8f0fe',
+                            color: '#4e73df'
+                        },
+                        {
+                            label: '活动数量',
+                            value: this.activities.length,
+                            icon: 'bi-calendar-event',
+                            bg: '#e6f9ed',
+                            color: '#1cc88a'
+                        },
+                        {
+                            label: '我的申请',
+                            value: this.myApplies.length,
+                            icon: 'bi-send',
+                            bg: '#fff4e5',
+                            color: '#f6c23e'
+                        },
+                        {
+                            label: '我的活动',
+                            value: this.mySignups.filter(s => s.status === 1).length,
+                            icon: 'bi-check2-circle',
+                            bg: '#fde8ec',
+                            color: '#e74a3b'
+                        }
+                    ]
+                } catch (e) {
+                    console.error(e)
+                }
+            },
+            openApply(r) {
+                this.applyTarget = r;
+                this.applyForm = {reason: '', strength: ''};
+                this.showApplyModal = true
+            },
+            async submitApply() {
+                if (!this.applyForm.reason) {
+                    alert('请填写申请理由');
+                    return
+                }
+                try {
+                    await axios.post('/api/apply/submit', {
+                        userId: this.user.id, clubId: this.applyTarget.clubId,
+                        recruitmentId: this.applyTarget.id,
+                        applyReason: this.applyForm.reason,
+                        personalStrength: this.applyForm.strength
+                    })
+                    alert('申请已提交')
+                    this.showApplyModal = false
+                    this.loadAll()
+                } catch (e) {
+                    alert('提交失败')
+                }
+            },
+            async signupActivity(a) {
+                if (!confirm('确定报名参加"' + a.activityName + '"？')) return
+                try {
+                    await axios.post('/api/signup/join', {activityId: a.id, userId: this.user.id})
+                    alert('报名成功')
+                    this.loadAll()
+                } catch (e) {
+                    alert('报名失败')
+                }
+            },
+            logout() {
+                localStorage.removeItem('user');
+                window.location.href = 'login.html'
+            }
+        }
+    }).mount('#app')
+</script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+2026-05-12 11:25:42.177 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.example.club.ClubManagementApplicationTests]: ClubManagementApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-12 11:25:42.239 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.example.club.ClubManagementApplication for test class com.example.club.ClubManagementApplicationTests
+2026-05-12 11:25:42.287 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.example.club.ClubManagementApplicationTests]: ClubManagementApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-12 11:25:42.290 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.example.club.ClubManagementApplication for test class com.example.club.ClubManagementApplicationTests
+2026-05-12 11:25:42.482 [main] INFO  c.e.c.ClubManagementApplicationTests - Starting ClubManagementApplicationTests using Java 25.0.2 with PID 37768 (started by 33480 in D:\Ideaworkspace\club-management)
+2026-05-12 11:25:42.482 [main] INFO  c.e.c.ClubManagementApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2026-05-12 11:25:43.424 [main] INFO  c.e.c.ClubManagementApplicationTests - Started ClubManagementApplicationTests in 1.103 seconds (process running for 1.905)
+2026-05-12 11:26:58.404 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.example.club.ClubManagementApplicationTests]: ClubManagementApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-12 11:26:58.465 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.example.club.ClubManagementApplication for test class com.example.club.ClubManagementApplicationTests
+2026-05-12 11:26:58.512 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.example.club.ClubManagementApplicationTests]: ClubManagementApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-12 11:26:58.513 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.example.club.ClubManagementApplication for test class com.example.club.ClubManagementApplicationTests
+2026-05-12 11:26:58.691 [main] INFO  c.e.c.ClubManagementApplicationTests - Starting ClubManagementApplicationTests using Java 25.0.2 with PID 36972 (started by 33480 in D:\Ideaworkspace\club-management)
+2026-05-12 11:26:58.692 [main] INFO  c.e.c.ClubManagementApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2026-05-12 11:26:59.576 [main] INFO  c.e.c.ClubManagementApplicationTests - Started ClubManagementApplicationTests in 1.03 seconds (process running for 1.806)
+2026-05-12 11:27:41.130 [main] INFO  c.e.club.ClubManagementApplication - Starting ClubManagementApplication using Java 25.0.1 with PID 17048 (D:\Ideaworkspace\club-management\target\classes started by 33480 in D:\Ideaworkspace\club-management)
+2026-05-12 11:27:41.131 [main] INFO  c.e.club.ClubManagementApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-12 11:27:41.662 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-05-12 11:27:41.669 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-05-12 11:27:41.670 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-12 11:27:41.670 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-12 11:27:41.706 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 547 ms
+2026-05-12 11:27:42.053 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-05-12 11:27:42.062 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-05-12 11:27:42.064 [main] INFO  c.e.club.ClubManagementApplication - Started ClubManagementApplication in 1.169 seconds (process running for 1.807)
+2026-05-12 11:27:55.023 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-12 11:27:55.024 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-05-12 11:27:55.024 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 0 ms
+2026-05-12 11:29:46.065 [SpringApplicationShutdownHook] INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-12 11:29:46.070 [tomcat-shutdown] INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-05-12 11:29:58.001 [main] INFO  c.e.club.ClubManagementApplication - Starting ClubManagementApplication using Java 25.0.1 with PID 34728 (D:\Ideaworkspace\club-management\target\classes started by 33480 in D:\Ideaworkspace\club-management)
+2026-05-12 11:29:58.002 [main] INFO  c.e.club.ClubManagementApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-12 11:29:58.474 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-05-12 11:29:58.482 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-05-12 11:29:58.483 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-12 11:29:58.483 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-12 11:29:58.526 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 504 ms
+2026-05-12 11:29:58.824 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-05-12 11:29:58.835 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-05-12 11:29:58.837 [main] INFO  c.e.club.ClubManagementApplication - Started ClubManagementApplication in 1.022 seconds (process running for 1.425)
+2026-05-12 11:30:07.448 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-12 11:30:07.449 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-05-12 11:30:07.450 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2026-05-12 11:30:47.592 [http-nio-8080-exec-7] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-05-12 11:30:47.684 [http-nio-8080-exec-7] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@11e91b74
+2026-05-12 11:30:47.685 [http-nio-8080-exec-7] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-05-12 11:32:31.990 [SpringApplicationShutdownHook] INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-12 11:32:31.994 [tomcat-shutdown] INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-05-12 11:32:31.996 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-05-12 11:32:32.002 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-05-12 11:36:38.271 [main] INFO  c.e.club.ClubManagementApplication - Starting ClubManagementApplication using Java 25.0.1 with PID 56540 (D:\Ideaworkspace\club-management\target\classes started by 33480 in D:\Ideaworkspace\club-management)
+2026-05-12 11:36:38.274 [main] INFO  c.e.club.ClubManagementApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-12 11:36:38.722 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-05-12 11:36:38.730 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-05-12 11:36:38.731 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-12 11:36:38.732 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-12 11:36:38.766 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 472 ms
+2026-05-12 11:36:39.044 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-05-12 11:36:39.053 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-05-12 11:36:39.056 [main] INFO  c.e.club.ClubManagementApplication - Started ClubManagementApplication in 0.961 seconds (process running for 1.376)
+2026-05-12 11:36:40.648 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-12 11:36:40.648 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-05-12 11:36:40.648 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 0 ms
+2026-05-12 11:36:40.732 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-05-12 11:36:40.803 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@105b336
+2026-05-12 11:36:40.804 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-05-12 11:37:19.222 [SpringApplicationShutdownHook] INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-12 11:37:19.227 [tomcat-shutdown] INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-05-12 11:37:19.229 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-05-12 11:37:19.233 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-05-12 18:58:18.758 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.example.club.ClubManagementApplicationTests]: ClubManagementApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-12 18:58:18.830 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.example.club.ClubManagementApplication for test class com.example.club.ClubManagementApplicationTests
+2026-05-12 18:58:18.888 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.example.club.ClubManagementApplicationTests]: ClubManagementApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-12 18:58:18.890 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.example.club.ClubManagementApplication for test class com.example.club.ClubManagementApplicationTests
+2026-05-12 18:58:19.099 [main] INFO  c.e.c.ClubManagementApplicationTests - Starting ClubManagementApplicationTests using Java 25.0.2 with PID 52024 (started by 33480 in D:\Ideaworkspace\club-management)
+2026-05-12 18:58:19.100 [main] INFO  c.e.c.ClubManagementApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2026-05-12 18:58:20.043 [main] INFO  c.e.c.ClubManagementApplicationTests - Started ClubManagementApplicationTests in 1.115 seconds (process running for 2.024)
+2026-05-12 18:59:20.835 [main] INFO  c.e.club.ClubManagementApplication - Starting ClubManagementApplication using Java 25.0.1 with PID 40332 (D:\Ideaworkspace\club-management\target\classes started by 33480 in D:\Ideaworkspace\club-management)
+2026-05-12 18:59:20.837 [main] INFO  c.e.club.ClubManagementApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-12 18:59:21.364 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-05-12 18:59:21.372 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-05-12 18:59:21.372 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-12 18:59:21.372 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-12 18:59:21.415 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 554 ms
+2026-05-12 18:59:21.755 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-05-12 18:59:21.764 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-05-12 18:59:21.767 [main] INFO  c.e.club.ClubManagementApplication - Started ClubManagementApplication in 1.152 seconds (process running for 1.723)
+2026-05-12 19:04:38.363 [SpringApplicationShutdownHook] INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-12 19:04:38.367 [tomcat-shutdown] INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-05-12 19:15:08.771 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.example.club.ClubManagementApplicationTests]: ClubManagementApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-12 19:15:08.825 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.example.club.ClubManagementApplication for test class com.example.club.ClubManagementApplicationTests
+2026-05-12 19:15:08.871 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.example.club.ClubManagementApplicationTests]: ClubManagementApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-12 19:15:08.874 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.example.club.ClubManagementApplication for test class com.example.club.ClubManagementApplicationTests
+2026-05-12 19:15:09.070 [main] INFO  c.e.c.ClubManagementApplicationTests - Starting ClubManagementApplicationTests using Java 25.0.2 with PID 47216 (started by 33480 in D:\Ideaworkspace\club-management)
+2026-05-12 19:15:09.070 [main] INFO  c.e.c.ClubManagementApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2026-05-12 19:15:10.029 [main] INFO  c.e.c.ClubManagementApplicationTests - Started ClubManagementApplicationTests in 1.121 seconds (process running for 1.891)
+2026-05-12 19:16:43.649 [main] INFO  c.e.club.ClubManagementApplication - Starting ClubManagementApplication using Java 25.0.1 with PID 33948 (D:\Ideaworkspace\club-management\target\classes started by 33480 in D:\Ideaworkspace\club-management)
+2026-05-12 19:16:43.650 [main] INFO  c.e.club.ClubManagementApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-12 19:16:44.096 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-05-12 19:16:44.102 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-05-12 19:16:44.103 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-12 19:16:44.103 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-12 19:16:44.138 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 468 ms
+2026-05-12 19:16:44.490 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-05-12 19:16:44.500 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-05-12 19:16:44.503 [main] INFO  c.e.club.ClubManagementApplication - Started ClubManagementApplication in 1.035 seconds (process running for 1.435)
+2026-05-12 19:16:56.897 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-12 19:16:56.898 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-05-12 19:16:56.899 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 0 ms
+2026-05-12 19:17:48.772 [http-nio-8080-exec-5] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-05-12 19:17:48.888 [http-nio-8080-exec-5] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@7e8c5364
+2026-05-12 19:17:48.889 [http-nio-8080-exec-5] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-05-12 19:23:13.481 [SpringApplicationShutdownHook] INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-12 19:23:13.487 [tomcat-shutdown] INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-05-12 19:23:13.489 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-05-12 19:23:13.493 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

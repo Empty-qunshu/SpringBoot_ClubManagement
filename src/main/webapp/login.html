@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>社团管理平台登录</title>
+    <link href="bootstrap5/bootstrap.min.css" rel="stylesheet">
+    <script src="bootstrap5/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #f5f7fa;
+        }
+
+        .container-full {
+            height: 100vh;
+        }
+
+        .left-panel {
+            background: linear-gradient(135deg, #4e73df, #36b9cc);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            width: 360px;
+            padding: 40px;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-btn {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="container-fluid container-full">
+    <div class="row h-100">
+        <div class="col-md-7 d-none d-md-flex left-panel">
+            <div class="text-center">
+                <h1>Neuedu</h1>
+                <p>大连东软信息学院</p>
+            </div>
+        </div>
+        <div class="col-md-5 d-flex align-items-center justify-content-center">
+            <div class="login-card">
+                <h4 class="text-center">欢迎使用</h4>
+                <h2 class="text-center mb-4 fw-bold">社团管理平台</h2>
+                <div class="mb-3"><input type="text" class="form-control" placeholder="账号" v-model="username"></div>
+                <div class="mb-3"><input type="password" class="form-control" placeholder="密码" v-model="password">
+                </div>
+                <button class="btn btn-primary w-100 login-btn" @click="login">登录</button>
+                <div class="text-center mt-3"><span>没有账号？</span><a href="register.html"
+                                                                       class="text-primary">去注册</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const {createApp} = Vue
+    createApp({
+        data() {
+            return {username: '', password: ''}
+        },
+        methods: {
+            login() {
+                if (!this.username || !this.password) {
+                    alert("请输入账号和密码");
+                    return
+                }
+                axios.post("/api/user/login", {username: this.username, password: this.password})
+                    .then(res => {
+                        if (res.data.code === 200) {
+                            alert("登录成功")
+                            localStorage.setItem("user", JSON.stringify(res.data.data))
+                            const user = res.data.data
+                            if (user.role === 1) {
+                                window.location.href = "Student.html"
+                            } else if (user.role === 2) {
+                                window.location.href = "Teacher.html"
+                            } else if (user.role === 3) {
+                                window.location.href = "ADHome.html"
+                            } else {
+                                alert("未知身份，请联系管理员")
+                            }
+                        } else {
+                            alert(res.data.message || res.data.msg || "登录失败")
+                        }
+                    }).catch(err => {
+                    console.error(err);
+                    alert("请求失败，请检查后端")
+                })
+            }
+        }
+    }).mount("#app")
+</script>
+</body>
+</html>

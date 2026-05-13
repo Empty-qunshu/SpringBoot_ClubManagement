@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>管理员端 - 社团管理平台</title>
+    <link href="bootstrap5/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="bootstrap5/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        :root {
+            --primary: #e74a3b;
+            --sidebar-w: 240px
+        }
+
+        body {
+            margin: 0;
+            background: #f5f7fa;
+            font-family: 'Microsoft YaHei', sans-serif
+        }
+
+        .navbar {
+            background: var(--primary);
+            color: #fff;
+            height: 56px
+        }
+
+        .sidebar {
+            width: var(--sidebar-w);
+            background: #fff;
+            min-height: calc(100vh - 56px);
+            box-shadow: 2px 0 8px rgba(0, 0, 0, .06);
+            position: fixed;
+            top: 56px;
+            left: 0;
+            z-index: 100
+        }
+
+        .sidebar .nav-link {
+            color: #555;
+            padding: 12px 20px;
+            border-left: 3px solid transparent;
+            transition: .2s;
+            cursor: pointer
+        }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: #fff5f5;
+            color: var(--primary);
+            border-left-color: var(--primary)
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 8px
+        }
+
+        .main {
+            margin-left: var(--sidebar-w);
+            padding: 24px;
+            min-height: calc(100vh - 56px)
+        }
+
+        .stat-card {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, .06)
+        }
+
+        .card {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, .06)
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .4);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            width: 550px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .15)
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <nav class="navbar px-3 d-flex align-items-center">
+        <span class="fw-bold fs-5"><i class="bi bi-shield-fill-check"></i> 社团管理平台 - 管理员</span>
+        <div class="ms-auto d-flex align-items-center">
+            <span class="me-3"><i class="bi bi-person-circle"></i> {{user.realName || user.username}}</span>
+            <button class="btn btn-outline-light btn-sm" @click="logout">退出登录</button>
+        </div>
+    </nav>
+    <div class="sidebar">
+        <div class="p-3 border-bottom"><small class="text-muted">管理员菜单</small></div>
+        <div class="nav-link" :class="{active:page==='home'}" @click="page='home'"><i class="bi bi-speedometer2"></i>
+            数据概览
+        </div>
+        <div class="nav-link" :class="{active:page==='users'}" @click="page='users'"><i class="bi bi-people"></i> 用户管理
+        </div>
+        <div class="nav-link" :class="{active:page==='clubs'}" @click="page='clubs'"><i class="bi bi-building"></i> 社团管理
+        </div>
+        <div class="nav-link" :class="{active:page==='notices'}" @click="page='notices'"><i class="bi bi-bell"></i> 公告管理
+        </div>
+        <div class="nav-link" :class="{active:page==='activities'}" @click="page='activities'"><i
+                class="bi bi-calendar-event"></i> 活动管理
+        </div>
+    </div>
+    <div class="main">
+
+        <div v-if="page==='home'">
+            <h4 class="mb-4">系统数据概览</h4>
+            <div class="row mb-4">
+                <div class="col-md-2 mb-3" v-for="s in stats" :key="s.label">
+                    <div class="stat-card card p-3 text-center">
+                        <small class="text-muted">{{s.label}}</small>
+                        <h2 :style="{color:s.color}">{{s.value}}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="page==='users'">
+            <h5 class="mb-3">用户管理</h5>
+            <div class="mb-3">
+                <select class="form-control w-auto d-inline-block me-2" v-model="userFilter" @change="loadUsers">
+                    <option value="">全部角色</option>
+                    <option value="1">学生</option>
+                    <option value="2">社团负责人</option>
+                    <option value="3">管理员</option>
+                </select>
+            </div>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>用户名</th>
+                    <th>真实姓名</th>
+                    <th>学号</th>
+                    <th>角色</th>
+                    <th>手机</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="u in users" :key="u.id">
+                    <td>{{u.id}}</td>
+                    <td>{{u.username}}</td>
+                    <td>{{u.realName}}</td>
+                    <td>{{u.studentNo}}</td>
+                    <td><span class="badge bg-info" v-if="u.role===1">学生</span><span class="badge bg-success"
+                                                                                       v-if="u.role===2">社团负责人</span><span
+                            class="badge bg-danger" v-if="u.role===3">管理员</span></td>
+                    <td>{{u.phone}}</td>
+                    <td><span class="badge bg-success" v-if="u.status===1">正常</span><span class="badge bg-secondary"
+                                                                                            v-else>停用</span></td>
+                    <td>
+                        <button class="btn btn-outline-primary btn-sm me-1" @click="editUser(u)">编辑</button>
+                        <button class="btn btn-outline-warning btn-sm me-1" @click="toggleUserStatus(u)">
+                            {{u.status === 1 ? '停用' : '启用'}}
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" @click="deleteUser(u)">删除</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div v-if="page==='clubs'">
+            <h5 class="mb-3">社团管理</h5>
+            <div class="row">
+                <div class="col-md-4 mb-3" v-for="c in clubs" :key="c.id">
+                    <div class="card p-3">
+                        <div class="d-flex justify-content-between"><h6>{{c.clubName}}</h6><span class="badge"
+                                                                                                 :class="c.status===1?'bg-success':'bg-secondary'">{{c.status === 1 ? '正常' : '停用'}}</span>
+                        </div>
+                        <p class="small text-muted">{{c.clubDescription}}</p>
+                        <small>类型: {{c.clubType}} | 成员: {{c.memberCount}}</small>
+                        <div class="mt-2">
+                            <button class="btn btn-outline-primary btn-sm me-1" @click="editClub(c)">编辑</button>
+                            <button class="btn btn-outline-warning btn-sm me-1" @click="toggleClubStatus(c)">
+                                {{c.status === 1 ? '停用' : '启用'}}
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" @click="deleteClub(c)">删除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="page==='notices'">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>公告管理</h5>
+                <button class="btn btn-danger btn-sm" @click="openNoticeModal()"><i class="bi bi-plus-lg"></i> 发布公告
+                </button>
+            </div>
+            <div v-for="n in notices" :key="n.id" class="card p-2 mb-2">
+                <div class="d-flex justify-content-between"><strong>{{n.title}}</strong><small
+                        class="text-muted">{{n.createTime}}</small></div>
+                <p class="mb-1 small">{{n.content}}</p>
+                <button class="btn btn-outline-primary btn-sm me-1" @click="editNotice(n)">编辑</button>
+                <button class="btn btn-outline-danger btn-sm" @click="deleteNotice(n)">删除</button>
+            </div>
+        </div>
+
+        <div v-if="page==='activities'">
+            <h5 class="mb-3">活动概览</h5>
+            <div class="row">
+                <div class="col-md-4 mb-3" v-for="a in activities" :key="a.id">
+                    <div class="card p-3">
+                        <h6>{{a.activityName}}</h6>
+                        <p class="small"><i class="bi bi-geo-alt"></i> {{a.location}} | <i class="bi bi-people"></i>
+                            {{a.currentPeople}}/{{a.maxPeople}}</p>
+                        <span class="badge bg-warning" v-if="a.status===1">未开始</span><span class="badge bg-primary"
+                                                                                              v-if="a.status===2">进行中</span><span
+                            class="badge bg-secondary" v-if="a.status===3">已结束</span>
+                        <div class="mt-2">
+                            <button class="btn btn-outline-danger btn-sm" @click="deleteAct(a)">删除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-overlay" v-if="showUserModal" @click.self="showUserModal=false">
+        <div class="modal-box">
+            <h5>编辑用户</h5>
+            <div class="mb-3"><label>用户名</label><input class="form-control" v-model="editUserForm.username"></div>
+            <div class="mb-3"><label>真实姓名</label><input class="form-control" v-model="editUserForm.realName"></div>
+            <div class="mb-3"><label>学号</label><input class="form-control" v-model="editUserForm.studentNo"></div>
+            <div class="mb-3"><label>角色</label><select class="form-control" v-model.number="editUserForm.role">
+                <option :value="1">学生</option>
+                <option :value="2">社团负责人</option>
+                <option :value="3">管理员</option>
+            </select></div>
+            <div class="mb-3"><label>手机</label><input class="form-control" v-model="editUserForm.phone"></div>
+            <div class="mb-3"><label>邮箱</label><input class="form-control" v-model="editUserForm.email"></div>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-secondary me-2" @click="showUserModal=false">取消</button>
+                <button class="btn btn-danger" @click="saveUser">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" v-if="showClubModal" @click.self="showClubModal=false">
+        <div class="modal-box">
+            <h5>{{clubForm.id ? '编辑社团' : '创建社团'}}</h5>
+            <div class="mb-3"><label>社团名称</label><input class="form-control" v-model="clubForm.clubName"></div>
+            <div class="mb-3"><label>描述</label><textarea class="form-control" rows="2"
+                                                           v-model="clubForm.clubDescription"></textarea></div>
+            <div class="mb-3"><label>类型</label><input class="form-control" v-model="clubForm.clubType"></div>
+            <div class="mb-3"><label>地点</label><input class="form-control" v-model="clubForm.location"></div>
+            <div class="mb-3"><label>负责人ID</label><input type="number" class="form-control"
+                                                            v-model.number="clubForm.leaderId"></div>
+            <div class="mb-3"><label>联系电话</label><input class="form-control" v-model="clubForm.contactPhone"></div>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-secondary me-2" @click="showClubModal=false">取消</button>
+                <button class="btn btn-danger" @click="saveClub">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" v-if="showNoticeModal" @click.self="showNoticeModal=false">
+        <div class="modal-box">
+            <h5>{{noticeForm.id ? '编辑公告' : '发布公告'}}</h5>
+            <div class="mb-3"><label>标题</label><input class="form-control" v-model="noticeForm.title"></div>
+            <div class="mb-3"><label>内容</label><textarea class="form-control" rows="4"
+                                                           v-model="noticeForm.content"></textarea></div>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-secondary me-2" @click="showNoticeModal=false">取消</button>
+                <button class="btn btn-danger" @click="saveNotice">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const {createApp} = Vue
+    createApp({
+        data() {
+            return {
+                user: {}, page: 'home', stats: [],
+                users: [], userFilter: '', clubs: [], activities: [], notices: [],
+                showUserModal: false, editUserForm: {},
+                showClubModal: false, clubForm: {},
+                showNoticeModal: false, noticeForm: {}
+            }
+        },
+        async mounted() {
+            const u = localStorage.getItem('user')
+            if (!u) {
+                window.location.href = 'login.html';
+                return
+            }
+            this.user = JSON.parse(u)
+            await this.loadAll()
+        },
+        methods: {
+            async loadAll() {
+                try {
+                    const [users, clubs, acts, notices] = await Promise.all([
+                        axios.get('/api/user/list'),
+                        axios.get('/api/club/list'),
+                        axios.get('/api/activity/list'),
+                        axios.get('/api/notice/list')
+                    ])
+                    this.users = users.data.data || []
+                    this.clubs = clubs.data.data || []
+                    this.activities = acts.data.data || []
+                    this.notices = notices.data.data || []
+                    this.stats = [
+                        {label: '用户总数', value: this.users.length, color: '#4e73df'},
+                        {label: '社团总数', value: this.clubs.length, color: '#1cc88a'},
+                        {label: '活动总数', value: this.activities.length, color: '#f6c23e'},
+                        {label: '公告总数', value: this.notices.length, color: '#e74a3b'},
+                        {label: '学生数', value: this.users.filter(u => u.role === 1).length, color: '#36b9cc'},
+                        {label: '负责人数', value: this.users.filter(u => u.role === 2).length, color: '#858796'}
+                    ]
+                } catch (e) {
+                    console.error(e)
+                }
+            },
+            async loadUsers() {
+                let url = '/api/user/list';
+                if (this.userFilter !== '') {
+                    url = '/api/user/byRole?role=' + this.userFilter
+                }
+                ;const res = await axios.get(url);
+                this.users = res.data.data || []
+            },
+            editUser(u) {
+                this.editUserForm = {...u};
+                this.showUserModal = true
+            },
+            async saveUser() {
+                try {
+                    await axios.put('/api/user/update', this.editUserForm);
+                    this.showUserModal = false;
+                    this.loadUsers();
+                    alert('保存成功')
+                } catch (e) {
+                    alert('保存失败')
+                }
+            },
+            async toggleUserStatus(u) {
+                const s = u.status === 1 ? 0 : 1;
+                await axios.put('/api/user/status/' + u.id + '?status=' + s);
+                this.loadUsers()
+            },
+            async deleteUser(u) {
+                if (!confirm('确定删除用户"' + u.username + '"？')) return;
+                await axios.delete('/api/user/delete/' + u.id);
+                this.loadUsers()
+            },
+            editClub(c) {
+                this.clubForm = {...c};
+                this.showClubModal = true
+            },
+            async saveClub() {
+                try {
+                    if (this.clubForm.id) {
+                        await axios.put('/api/club/update', this.clubForm)
+                    } else {
+                        await axios.post('/api/club/add', this.clubForm)
+                    }
+                    ;this.showClubModal = false;
+                    this.loadAll();
+                    alert('保存成功')
+                } catch (e) {
+                    alert('保存失败')
+                }
+            },
+            async toggleClubStatus(c) {
+                const s = c.status === 1 ? 0 : 1;
+                await axios.put('/api/club/status/' + c.id + '?status=' + s);
+                this.loadAll()
+            },
+            async deleteClub(c) {
+                if (!confirm('确定删除社团"' + c.clubName + '"？')) return;
+                await axios.delete('/api/club/delete/' + c.id);
+                this.loadAll()
+            },
+            openNoticeModal() {
+                this.noticeForm = {title: '', content: ''};
+                this.showNoticeModal = true
+            },
+            editNotice(n) {
+                this.noticeForm = {...n};
+                this.showNoticeModal = true
+            },
+            async saveNotice() {
+                try {
+                    if (this.noticeForm.id) {
+                        await axios.put('/api/notice/update', this.noticeForm)
+                    } else {
+                        await axios.post('/api/notice/add', {...this.noticeForm, publisherId: this.user.id})
+                    }
+                    ;this.showNoticeModal = false;
+                    this.loadAll();
+                    alert('保存成功')
+                } catch (e) {
+                    alert('保存失败')
+                }
+            },
+            async deleteNotice(n) {
+                if (!confirm('确定删除？')) return;
+                await axios.delete('/api/notice/delete/' + n.id);
+                this.loadAll()
+            },
+            async deleteAct(a) {
+                if (!confirm('确定删除？')) return;
+                await axios.delete('/api/activity/delete/' + a.id);
+                this.loadAll()
+            },
+            logout() {
+                localStorage.removeItem('user');
+                window.location.href = 'login.html'
+            }
+        }
+    }).mount('#app')
+</script>
+</body>
+</html>
