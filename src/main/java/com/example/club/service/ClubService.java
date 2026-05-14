@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
@@ -20,6 +21,18 @@ public class ClubService {
 
     public List<Club> findAll() {
         return clubMapper.selectAll();
+    }
+
+    public List<Club> search(String keyword) {
+        List<Club> clubs = clubMapper.selectAll();
+        if (keyword == null || keyword.isBlank()) return clubs;
+        String kw = keyword.toLowerCase(Locale.ROOT);
+        return clubs.stream()
+                .filter(club -> contains(club.getClubName(), kw)
+                        || contains(club.getClubDescription(), kw)
+                        || contains(club.getClubType(), kw)
+                        || contains(club.getLocation(), kw))
+                .toList();
     }
 
     public Club findById(Integer id) {
@@ -58,5 +71,9 @@ public class ClubService {
         Map<String, Object> stats = new HashMap<>();
         stats.put("total", clubMapper.selectAll().size());
         return stats;
+    }
+
+    private boolean contains(String value, String keyword) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(keyword);
     }
 }

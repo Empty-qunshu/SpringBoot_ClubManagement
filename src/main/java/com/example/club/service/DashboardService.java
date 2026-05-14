@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
@@ -33,13 +34,20 @@ public class DashboardService {
     }
 
     public Map<String, Object> stats() {
+        var clubs = clubMapper.selectAll();
+        var activities = activityMapper.selectAll();
+        var users = userMapper.findAll();
+
         Map<String, Object> data = new HashMap<>();
-        data.put("clubCount", clubMapper.selectAll().size());
-        data.put("activityCount", activityMapper.selectAll().size());
+        data.put("clubCount", clubs.size());
+        data.put("activityCount", activities.size());
         data.put("memberCount", clubMemberMapper.selectAll().size());
         data.put("applyCount", clubApplyMapper.selectAll().size());
         data.put("noticeCount", noticeMapper.selectAll().size());
-        data.put("userCount", userMapper.findAll().size());
+        data.put("userCount", users.size());
+        data.put("roleStats", users.stream().collect(Collectors.groupingBy(u -> u.getRole() == null ? 0 : u.getRole(), Collectors.counting())));
+        data.put("clubTypeStats", clubs.stream().collect(Collectors.groupingBy(c -> c.getClubType() == null || c.getClubType().isBlank() ? "未分类" : c.getClubType(), Collectors.counting())));
+        data.put("activityStatusStats", activities.stream().collect(Collectors.groupingBy(a -> a.getStatus() == null ? 0 : a.getStatus(), Collectors.counting())));
         return data;
     }
 }

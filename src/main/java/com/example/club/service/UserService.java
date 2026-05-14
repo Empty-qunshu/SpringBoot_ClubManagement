@@ -3,12 +3,14 @@ package com.example.club.service;
 import com.example.club.entity.LoginInfo;
 import com.example.club.entity.User;
 import com.example.club.mapper.UserMapper;
+import com.example.club.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 @Slf4j
@@ -35,7 +37,7 @@ public class UserService {
         User u = login(user.getUsername(), user.getPassword());
         if (u != null) {
             log.info("login success:{}", u.getUsername());
-            return new LoginInfo(u.getId(), u.getUsername(), "");
+            return new LoginInfo(u.getId(), u.getUsername(), u.getRealName(), u.getRole(), u.getAvatar(), JwtUtil.generate(u));
         }
         return null;
     }
@@ -54,6 +56,19 @@ public class UserService {
 
     public List<User> findByRole(Integer role) {
         return userMapper.selectByRole(role);
+    }
+
+    public List<User> search(Integer role, String keyword) {
+        List<User> users = role == null ? userMapper.findAll() : userMapper.selectByRole(role);
+        if (!StringUtils.hasText(keyword)) return users;
+        String kw = keyword.toLowerCase(Locale.ROOT);
+        return users.stream()
+                .filter(user -> contains(user.getUsername(), kw)
+                        || contains(user.getRealName(), kw)
+                        || contains(user.getStudentNo(), kw)
+                        || contains(user.getPhone(), kw)
+                        || contains(user.getEmail(), kw))
+                .toList();
     }
 
     public User withoutPassword(User user) {
@@ -103,5 +118,9 @@ public class UserService {
 
     public void deleteById(Integer id) {
         userMapper.deleteById(id);
+    }
+
+    private boolean contains(String value, String keyword) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(keyword);
     }
 }

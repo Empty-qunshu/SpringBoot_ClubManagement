@@ -1,6 +1,7 @@
 package com.example.club.controller;
 
 import com.example.club.entity.Club;
+import com.example.club.entity.PageResult;
 import com.example.club.entity.Result;
 import com.example.club.service.ClubService;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -26,8 +27,14 @@ public class ClubController {
     }
 
     @GetMapping("/list")
-    public Result list() {
-        return Result.success(clubService.findAll());
+    public Result list(@RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) Integer page,
+                       @RequestParam(required = false) Integer pageSize) {
+        var clubs = clubService.search(keyword);
+        if (page != null || pageSize != null) {
+            return Result.success(PageResult.of(clubs, page, pageSize));
+        }
+        return Result.success(clubs);
     }
 
     @GetMapping("/get/{id}")

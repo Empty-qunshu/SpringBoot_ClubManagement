@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class ActivityService {
@@ -18,6 +19,17 @@ public class ActivityService {
 
     public List<Activity> findAll() {
         return activityMapper.selectAll();
+    }
+
+    public List<Activity> search(String keyword) {
+        List<Activity> activities = activityMapper.selectAll();
+        if (keyword == null || keyword.isBlank()) return activities;
+        String kw = keyword.toLowerCase(Locale.ROOT);
+        return activities.stream()
+                .filter(activity -> contains(activity.getActivityName(), kw)
+                        || contains(activity.getDescription(), kw)
+                        || contains(activity.getLocation(), kw))
+                .toList();
     }
 
     public Activity findById(Integer id) {
@@ -46,5 +58,9 @@ public class ActivityService {
 
     public List<Activity> findByClubId(Integer clubId) {
         return activityMapper.selectByClubId(clubId);
+    }
+
+    private boolean contains(String value, String keyword) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(keyword);
     }
 }

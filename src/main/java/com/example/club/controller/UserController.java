@@ -1,8 +1,10 @@
 package com.example.club.controller;
 
+import com.example.club.entity.PageResult;
 import com.example.club.entity.Result;
 import com.example.club.entity.User;
 import com.example.club.service.UserService;
+import com.example.club.util.JwtUtil;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,6 +42,7 @@ public class UserController {
             res.put("code", 200);
             res.put("message", "登录成功");
             res.put("data", userService.withoutPassword(result));
+            res.put("token", JwtUtil.generate(result));
         }
         return res;
     }
@@ -59,9 +62,15 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public Result list() {
-        List<User> users = userService.findAll();
-        return Result.success(userService.withoutPasswords(users));
+    public Result list(@RequestParam(required = false) Integer role,
+                       @RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) Integer page,
+                       @RequestParam(required = false) Integer pageSize) {
+        List<User> users = userService.withoutPasswords(userService.search(role, keyword));
+        if (page != null || pageSize != null) {
+            return Result.success(PageResult.of(users, page, pageSize));
+        }
+        return Result.success(users);
     }
 
     @GetMapping("/get/{id}")

@@ -1,280 +1,178 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>管理员端 - 社团管理平台</title>
     <link href="bootstrap5/bootstrap.min.css" rel="stylesheet">
     <link href="bootstrap5/font/bootstrap-icons.css" rel="stylesheet">
     <script src="bootstrap5/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/vue@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
     <style>
-        :root {
-            --primary: #e74a3b;
-            --sidebar-w: 240px
-        }
-
-        body {
-            margin: 0;
-            background: #f5f7fa;
-            font-family: 'Microsoft YaHei', sans-serif
-        }
-
-        .navbar {
-            background: var(--primary);
-            color: #fff;
-            height: 56px
-        }
-
-        .sidebar {
-            width: var(--sidebar-w);
-            background: #fff;
-            min-height: calc(100vh - 56px);
-            box-shadow: 2px 0 8px rgba(0, 0, 0, .06);
-            position: fixed;
-            top: 56px;
-            left: 0;
-            z-index: 100
-        }
-
-        .sidebar .nav-link {
-            color: #555;
-            padding: 12px 20px;
-            border-left: 3px solid transparent;
-            transition: .2s;
-            cursor: pointer
-        }
-
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background: #fff5f5;
-            color: var(--primary);
-            border-left-color: var(--primary)
-        }
-
-        .sidebar .nav-link i {
-            margin-right: 8px
-        }
-
-        .main {
-            margin-left: var(--sidebar-w);
-            padding: 24px;
-            min-height: calc(100vh - 56px)
-        }
-
-        .stat-card {
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, .06)
-        }
-
-        .card {
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, .06)
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, .4);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center
-        }
-
-        .modal-box {
-            background: #fff;
-            border-radius: 16px;
-            padding: 30px;
-            width: 550px;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, .15)
-        }
+        :root { --primary: #d94b3d; --sidebar-w: 236px; }
+        body { margin: 0; background: #f3f6fb; font-family: "Microsoft YaHei", Arial, sans-serif; color: #263142; }
+        .navbar { background: var(--primary); color: #fff; height: 56px; }
+        .sidebar { width: var(--sidebar-w); background: #fff; min-height: calc(100vh - 56px); position: fixed; top: 56px; left: 0; box-shadow: 2px 0 12px rgba(36, 48, 71, .08); }
+        .sidebar .nav-link { color: #526071; padding: 13px 20px; border-left: 3px solid transparent; cursor: pointer; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background: #fff2f0; color: var(--primary); border-left-color: var(--primary); }
+        .main { margin-left: var(--sidebar-w); padding: 24px; min-height: calc(100vh - 56px); }
+        .card, .stat-card { border: 0; border-radius: 8px; box-shadow: 0 6px 20px rgba(36, 48, 71, .07); }
+        .chart-box { height: 320px; }
+        .toolbar { background: #fff; border-radius: 8px; padding: 14px; box-shadow: 0 6px 20px rgba(36, 48, 71, .06); }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #e8edf5; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(17, 24, 39, .45); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .modal-box { background: #fff; border-radius: 8px; padding: 24px; width: 560px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 64px rgba(17, 24, 39, .24); }
     </style>
 </head>
 <body>
 <div id="app">
     <nav class="navbar px-3 d-flex align-items-center">
-        <span class="fw-bold fs-5"><i class="bi bi-shield-fill-check"></i> 社团管理平台 - 管理员</span>
+        <span class="fw-bold fs-5"><i class="bi bi-shield-fill-check me-2"></i>社团管理平台 - 管理员</span>
         <div class="ms-auto d-flex align-items-center">
-            <span class="me-3"><i class="bi bi-person-circle"></i> {{user.realName || user.username}}</span>
-            <button class="btn btn-outline-light btn-sm" @click="logout">退出登录</button>
+            <img :src="user.avatar || 'images/logo.png'" class="avatar me-2" alt="avatar">
+            <span class="me-3">{{user.realName || user.username}}</span>
+            <button class="btn btn-outline-light btn-sm" @click="logout"><i class="bi bi-box-arrow-right"></i> 退出</button>
         </div>
     </nav>
-    <div class="sidebar">
-        <div class="p-3 border-bottom"><small class="text-muted">管理员菜单</small></div>
-        <div class="nav-link" :class="{active:page==='home'}" @click="page='home'"><i class="bi bi-speedometer2"></i>
-            数据概览
-        </div>
-        <div class="nav-link" :class="{active:page==='users'}" @click="page='users'"><i class="bi bi-people"></i> 用户管理
-        </div>
-        <div class="nav-link" :class="{active:page==='clubs'}" @click="page='clubs'"><i class="bi bi-building"></i> 社团管理
-        </div>
-        <div class="nav-link" :class="{active:page==='notices'}" @click="page='notices'"><i class="bi bi-bell"></i> 公告管理
-        </div>
-        <div class="nav-link" :class="{active:page==='activities'}" @click="page='activities'"><i
-                class="bi bi-calendar-event"></i> 活动管理
-        </div>
-    </div>
-    <div class="main">
 
-        <div v-if="page==='home'">
+    <aside class="sidebar">
+        <div class="p-3 border-bottom"><small class="text-muted">管理员菜单</small></div>
+        <div class="nav-link" :class="{active:page==='home'}" @click="switchPage('home')"><i class="bi bi-speedometer2 me-2"></i>数据概览</div>
+        <div class="nav-link" :class="{active:page==='users'}" @click="switchPage('users')"><i class="bi bi-people me-2"></i>用户管理</div>
+        <div class="nav-link" :class="{active:page==='clubs'}" @click="switchPage('clubs')"><i class="bi bi-building me-2"></i>社团管理</div>
+        <div class="nav-link" :class="{active:page==='activities'}" @click="switchPage('activities')"><i class="bi bi-calendar-event me-2"></i>活动管理</div>
+        <div class="nav-link" :class="{active:page==='notices'}" @click="switchPage('notices')"><i class="bi bi-bell me-2"></i>公告管理</div>
+    </aside>
+
+    <main class="main">
+        <section v-if="page==='home'">
             <h4 class="mb-4">系统数据概览</h4>
             <div class="row mb-4">
                 <div class="col-md-2 mb-3" v-for="s in stats" :key="s.label">
                     <div class="stat-card card p-3 text-center">
                         <small class="text-muted">{{s.label}}</small>
-                        <h2 :style="{color:s.color}">{{s.value}}</h2>
+                        <h2 class="mt-2 mb-0" :style="{color:s.color}">{{s.value}}</h2>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div v-if="page==='users'">
-            <h5 class="mb-3">用户管理</h5>
-            <div class="mb-3">
-                <select class="form-control w-auto d-inline-block me-2" v-model="userFilter" @change="loadUsers">
-                    <option value="">全部角色</option>
-                    <option value="1">学生</option>
-                    <option value="2">社团负责人</option>
-                    <option value="3">管理员</option>
-                </select>
-            </div>
-            <table class="table table-hover">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>用户名</th>
-                    <th>真实姓名</th>
-                    <th>学号</th>
-                    <th>角色</th>
-                    <th>手机</th>
-                    <th>状态</th>
-                    <th>操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="u in users" :key="u.id">
-                    <td>{{u.id}}</td>
-                    <td>{{u.username}}</td>
-                    <td>{{u.realName}}</td>
-                    <td>{{u.studentNo}}</td>
-                    <td><span class="badge bg-info" v-if="u.role===1">学生</span><span class="badge bg-success"
-                                                                                       v-if="u.role===2">社团负责人</span><span
-                            class="badge bg-danger" v-if="u.role===3">管理员</span></td>
-                    <td>{{u.phone}}</td>
-                    <td><span class="badge bg-success" v-if="u.status===1">正常</span><span class="badge bg-secondary"
-                                                                                            v-else>停用</span></td>
-                    <td>
-                        <button class="btn btn-outline-primary btn-sm me-1" @click="editUser(u)">编辑</button>
-                        <button class="btn btn-outline-warning btn-sm me-1" @click="toggleUserStatus(u)">
-                            {{u.status === 1 ? '停用' : '启用'}}
-                        </button>
-                        <button class="btn btn-outline-danger btn-sm" @click="deleteUser(u)">删除</button>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div v-if="page==='clubs'">
-            <h5 class="mb-3">社团管理</h5>
             <div class="row">
-                <div class="col-md-4 mb-3" v-for="c in clubs" :key="c.id">
-                    <div class="card p-3">
-                        <div class="d-flex justify-content-between"><h6>{{c.clubName}}</h6><span class="badge"
-                                                                                                 :class="c.status===1?'bg-success':'bg-secondary'">{{c.status === 1 ? '正常' : '停用'}}</span>
-                        </div>
-                        <p class="small text-muted">{{c.clubDescription}}</p>
-                        <small>类型: {{c.clubType}} | 成员: {{c.memberCount}}</small>
+                <div class="col-lg-4 mb-3"><div class="card p-3"><h6>用户角色分布</h6><div id="roleChart" class="chart-box"></div></div></div>
+                <div class="col-lg-4 mb-3"><div class="card p-3"><h6>社团类型分布</h6><div id="clubChart" class="chart-box"></div></div></div>
+                <div class="col-lg-4 mb-3"><div class="card p-3"><h6>活动状态分布</h6><div id="activityChart" class="chart-box"></div></div></div>
+            </div>
+        </section>
+
+        <section v-if="page==='users'">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">用户管理</h5>
+                <button class="btn btn-danger btn-sm" @click="loadUsers"><i class="bi bi-arrow-clockwise"></i> 刷新</button>
+            </div>
+            <div class="toolbar d-flex gap-2 align-items-center mb-3">
+                <input class="form-control" style="max-width:260px" placeholder="搜索账号、姓名、学号、电话" v-model.trim="userQuery.keyword" @keyup.enter="searchUsers">
+                <select class="form-select" style="max-width:160px" v-model="userQuery.role" @change="searchUsers">
+                    <option value="">全部角色</option><option value="1">学生</option><option value="2">社团负责人</option><option value="3">管理员</option>
+                </select>
+                <button class="btn btn-outline-danger" @click="searchUsers"><i class="bi bi-search"></i> 搜索</button>
+            </div>
+            <div class="card p-3">
+                <table class="table table-hover align-middle">
+                    <thead><tr><th>ID</th><th>头像</th><th>账号</th><th>姓名</th><th>学号</th><th>角色</th><th>电话</th><th>状态</th><th>操作</th></tr></thead>
+                    <tbody>
+                    <tr v-for="u in users.records" :key="u.id">
+                        <td>{{u.id}}</td><td><img :src="u.avatar || 'images/logo.png'" class="avatar" alt=""></td><td>{{u.username}}</td><td>{{u.realName}}</td><td>{{u.studentNo}}</td>
+                        <td><span class="badge" :class="roleClass(u.role)">{{roleText(u.role)}}</span></td><td>{{u.phone}}</td>
+                        <td><span class="badge" :class="u.status===1?'bg-success':'bg-secondary'">{{u.status===1?'正常':'停用'}}</span></td>
+                        <td>
+                            <button class="btn btn-outline-primary btn-sm me-1" @click="editUser(u)">编辑</button>
+                            <button class="btn btn-outline-warning btn-sm me-1" @click="toggleUserStatus(u)">{{u.status===1?'停用':'启用'}}</button>
+                            <button class="btn btn-outline-danger btn-sm" @click="deleteUser(u)">删除</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">共 {{users.total}} 条</small>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary" :disabled="userQuery.page<=1" @click="changePage('users', -1)">上一页</button>
+                        <button class="btn btn-outline-secondary disabled">第 {{userQuery.page}} 页</button>
+                        <button class="btn btn-outline-secondary" :disabled="userQuery.page>=pageCount(users)" @click="changePage('users', 1)">下一页</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section v-if="page==='clubs'">
+            <h5 class="mb-3">社团管理</h5>
+            <div class="toolbar d-flex gap-2 mb-3">
+                <input class="form-control" style="max-width:300px" placeholder="搜索社团名称、类型、地点" v-model.trim="clubQuery.keyword" @keyup.enter="searchClubs">
+                <button class="btn btn-outline-danger" @click="searchClubs"><i class="bi bi-search"></i> 搜索</button>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3" v-for="c in clubs.records" :key="c.id">
+                    <div class="card p-3 h-100">
+                        <div class="d-flex justify-content-between"><h6>{{c.clubName}}</h6><span class="badge" :class="c.status===1?'bg-success':'bg-secondary'">{{c.status===1?'正常':'停用'}}</span></div>
+                        <p class="small text-muted flex-grow-1">{{c.clubDescription}}</p>
+                        <small>类型：{{c.clubType}} | 成员：{{c.memberCount}} | 地点：{{c.location}}</small>
                         <div class="mt-2">
-                            <button class="btn btn-outline-primary btn-sm me-1" @click="editClub(c)">编辑</button>
-                            <button class="btn btn-outline-warning btn-sm me-1" @click="toggleClubStatus(c)">
-                                {{c.status === 1 ? '停用' : '启用'}}
-                            </button>
+                            <button class="btn btn-outline-warning btn-sm me-1" @click="toggleClubStatus(c)">{{c.status===1?'停用':'启用'}}</button>
                             <button class="btn btn-outline-danger btn-sm" @click="deleteClub(c)">删除</button>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+            <pager :box="clubs" :query="clubQuery" @turn="changePage('clubs', $event)"></pager>
+        </section>
 
-        <div v-if="page==='notices'">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5>公告管理</h5>
-                <button class="btn btn-danger btn-sm" @click="openNoticeModal()"><i class="bi bi-plus-lg"></i> 发布公告
-                </button>
+        <section v-if="page==='activities'">
+            <h5 class="mb-3">活动管理</h5>
+            <div class="toolbar d-flex gap-2 mb-3">
+                <input class="form-control" style="max-width:300px" placeholder="搜索活动名称、地点、描述" v-model.trim="activityQuery.keyword" @keyup.enter="searchActivities">
+                <button class="btn btn-outline-danger" @click="searchActivities"><i class="bi bi-search"></i> 搜索</button>
             </div>
-            <div v-for="n in notices" :key="n.id" class="card p-2 mb-2">
-                <div class="d-flex justify-content-between"><strong>{{n.title}}</strong><small
-                        class="text-muted">{{n.createTime}}</small></div>
-                <p class="mb-1 small">{{n.content}}</p>
-                <button class="btn btn-outline-primary btn-sm me-1" @click="editNotice(n)">编辑</button>
-                <button class="btn btn-outline-danger btn-sm" @click="deleteNotice(n)">删除</button>
-            </div>
-        </div>
-
-        <div v-if="page==='activities'">
-            <h5 class="mb-3">活动概览</h5>
             <div class="row">
-                <div class="col-md-4 mb-3" v-for="a in activities" :key="a.id">
-                    <div class="card p-3">
-                        <h6>{{a.activityName}}</h6>
-                        <p class="small"><i class="bi bi-geo-alt"></i> {{a.location}} | <i class="bi bi-people"></i>
-                            {{a.currentPeople}}/{{a.maxPeople}}</p>
-                        <span class="badge bg-warning" v-if="a.status===1">未开始</span><span class="badge bg-primary"
-                                                                                              v-if="a.status===2">进行中</span><span
-                            class="badge bg-secondary" v-if="a.status===3">已结束</span>
-                        <div class="mt-2">
-                            <button class="btn btn-outline-danger btn-sm" @click="deleteAct(a)">删除</button>
-                        </div>
+                <div class="col-md-4 mb-3" v-for="a in activities.records" :key="a.id">
+                    <div class="card p-3 h-100">
+                        <h6>{{a.activityName}}</h6><p class="small text-muted">{{a.description}}</p>
+                        <small><i class="bi bi-geo-alt"></i> {{a.location}} | <i class="bi bi-people"></i> {{a.currentPeople}}/{{a.maxPeople}}</small>
+                        <span class="badge mt-2 align-self-start" :class="activityClass(a.status)">{{activityText(a.status)}}</span>
+                        <div class="mt-2"><button class="btn btn-outline-danger btn-sm" @click="deleteAct(a)">删除</button></div>
                     </div>
                 </div>
             </div>
-        </div>
+            <pager :box="activities" :query="activityQuery" @turn="changePage('activities', $event)"></pager>
+        </section>
 
-    </div>
+        <section v-if="page==='notices'">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">公告管理</h5>
+                <button class="btn btn-danger btn-sm" @click="openNoticeModal()"><i class="bi bi-plus-lg"></i> 发布公告</button>
+            </div>
+            <div v-for="n in notices" :key="n.id" class="card p-3 mb-2">
+                <div class="d-flex justify-content-between"><strong>{{n.title}}</strong><small class="text-muted">{{n.createTime}}</small></div>
+                <p class="mb-2 small">{{n.content}}</p>
+                <div><button class="btn btn-outline-primary btn-sm me-1" @click="editNotice(n)">编辑</button><button class="btn btn-outline-danger btn-sm" @click="deleteNotice(n)">删除</button></div>
+            </div>
+        </section>
+    </main>
 
     <div class="modal-overlay" v-if="showUserModal" @click.self="showUserModal=false">
         <div class="modal-box">
-            <h5>编辑用户</h5>
-            <div class="mb-3"><label>用户名</label><input class="form-control" v-model="editUserForm.username"></div>
-            <div class="mb-3"><label>真实姓名</label><input class="form-control" v-model="editUserForm.realName"></div>
-            <div class="mb-3"><label>学号</label><input class="form-control" v-model="editUserForm.studentNo"></div>
-            <div class="mb-3"><label>角色</label><select class="form-control" v-model.number="editUserForm.role">
-                <option :value="1">学生</option>
-                <option :value="2">社团负责人</option>
-                <option :value="3">管理员</option>
-            </select></div>
-            <div class="mb-3"><label>手机</label><input class="form-control" v-model="editUserForm.phone"></div>
-            <div class="mb-3"><label>邮箱</label><input class="form-control" v-model="editUserForm.email"></div>
-            <div class="d-flex justify-content-end">
-                <button class="btn btn-secondary me-2" @click="showUserModal=false">取消</button>
-                <button class="btn btn-danger" @click="saveUser">保存</button>
+            <h5 class="mb-3">编辑用户</h5>
+            <div class="d-flex align-items-center mb-3">
+                <img :src="editUserForm.avatar || 'images/logo.png'" class="avatar me-3" alt="">
+                <input type="file" class="form-control" accept="image/*" @change="uploadAvatar">
             </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" v-if="showClubModal" @click.self="showClubModal=false">
-        <div class="modal-box">
-            <h5>{{clubForm.id ? '编辑社团' : '创建社团'}}</h5>
-            <div class="mb-3"><label>社团名称</label><input class="form-control" v-model="clubForm.clubName"></div>
-            <div class="mb-3"><label>描述</label><textarea class="form-control" rows="2"
-                                                           v-model="clubForm.clubDescription"></textarea></div>
-            <div class="mb-3"><label>类型</label><input class="form-control" v-model="clubForm.clubType"></div>
-            <div class="mb-3"><label>地点</label><input class="form-control" v-model="clubForm.location"></div>
-            <div class="mb-3"><label>负责人ID</label><input type="number" class="form-control"
-                                                            v-model.number="clubForm.leaderId"></div>
-            <div class="mb-3"><label>联系电话</label><input class="form-control" v-model="clubForm.contactPhone"></div>
-            <div class="d-flex justify-content-end">
-                <button class="btn btn-secondary me-2" @click="showClubModal=false">取消</button>
-                <button class="btn btn-danger" @click="saveClub">保存</button>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label>账号</label><input class="form-control" v-model="editUserForm.username"></div>
+                <div class="col-md-6 mb-3"><label>姓名</label><input class="form-control" v-model="editUserForm.realName"></div>
+                <div class="col-md-6 mb-3"><label>学号</label><input class="form-control" v-model="editUserForm.studentNo"></div>
+                <div class="col-md-6 mb-3"><label>角色</label><select class="form-select" v-model.number="editUserForm.role"><option :value="1">学生</option><option :value="2">社团负责人</option><option :value="3">管理员</option></select></div>
+                <div class="col-md-6 mb-3"><label>电话</label><input class="form-control" v-model="editUserForm.phone"></div>
+                <div class="col-md-6 mb-3"><label>邮箱</label><input class="form-control" v-model="editUserForm.email"></div>
             </div>
+            <div class="d-flex justify-content-end"><button class="btn btn-secondary me-2" @click="showUserModal=false">取消</button><button class="btn btn-danger" @click="saveUser">保存</button></div>
         </div>
     </div>
 
@@ -282,158 +180,138 @@
         <div class="modal-box">
             <h5>{{noticeForm.id ? '编辑公告' : '发布公告'}}</h5>
             <div class="mb-3"><label>标题</label><input class="form-control" v-model="noticeForm.title"></div>
-            <div class="mb-3"><label>内容</label><textarea class="form-control" rows="4"
-                                                           v-model="noticeForm.content"></textarea></div>
-            <div class="d-flex justify-content-end">
-                <button class="btn btn-secondary me-2" @click="showNoticeModal=false">取消</button>
-                <button class="btn btn-danger" @click="saveNotice">保存</button>
-            </div>
+            <div class="mb-3"><label>内容</label><textarea class="form-control" rows="4" v-model="noticeForm.content"></textarea></div>
+            <div class="d-flex justify-content-end"><button class="btn btn-secondary me-2" @click="showNoticeModal=false">取消</button><button class="btn btn-danger" @click="saveNotice">保存</button></div>
         </div>
     </div>
 </div>
 
 <script>
     const {createApp} = Vue
+    const Pager = {
+        props: ['box', 'query'],
+        emits: ['turn'],
+        template: `<div class="d-flex justify-content-between align-items-center mt-2"><small class="text-muted">共 {{box.total||0}} 条</small><div class="btn-group btn-group-sm"><button class="btn btn-outline-secondary" :disabled="query.page<=1" @click="$emit('turn',-1)">上一页</button><button class="btn btn-outline-secondary disabled">第 {{query.page}} 页</button><button class="btn btn-outline-secondary" :disabled="query.page>=Math.max(1, Math.ceil((box.total||0)/query.pageSize))" @click="$emit('turn',1)">下一页</button></div></div>`
+    }
     createApp({
+        components: {Pager},
         data() {
             return {
-                user: {}, page: 'home', stats: [],
-                users: [], userFilter: '', clubs: [], activities: [], notices: [],
+                user: {}, page: 'home', stats: [], dashboard: {},
+                users: {records: [], total: 0}, clubs: {records: [], total: 0}, activities: {records: [], total: 0}, notices: [],
+                userQuery: {keyword: '', role: '', page: 1, pageSize: 8},
+                clubQuery: {keyword: '', page: 1, pageSize: 6},
+                activityQuery: {keyword: '', page: 1, pageSize: 6},
                 showUserModal: false, editUserForm: {},
-                showClubModal: false, clubForm: {},
                 showNoticeModal: false, noticeForm: {}
             }
         },
         async mounted() {
-            const u = localStorage.getItem('user')
-            if (!u) {
-                window.location.href = 'login.html';
-                return
-            }
-            this.user = JSON.parse(u)
+            this.initAuth()
             await this.loadAll()
         },
         methods: {
-            async loadAll() {
-                try {
-                    const [users, clubs, acts, notices] = await Promise.all([
-                        axios.get('/api/user/list'),
-                        axios.get('/api/club/list'),
-                        axios.get('/api/activity/list'),
-                        axios.get('/api/notice/list')
-                    ])
-                    this.users = users.data.data || []
-                    this.clubs = clubs.data.data || []
-                    this.activities = acts.data.data || []
-                    this.notices = notices.data.data || []
-                    this.stats = [
-                        {label: '用户总数', value: this.users.length, color: '#4e73df'},
-                        {label: '社团总数', value: this.clubs.length, color: '#1cc88a'},
-                        {label: '活动总数', value: this.activities.length, color: '#f6c23e'},
-                        {label: '公告总数', value: this.notices.length, color: '#e74a3b'},
-                        {label: '学生数', value: this.users.filter(u => u.role === 1).length, color: '#36b9cc'},
-                        {label: '负责人数', value: this.users.filter(u => u.role === 2).length, color: '#858796'}
-                    ]
-                } catch (e) {
-                    console.error(e)
-                }
+            initAuth() {
+                const token = localStorage.getItem('token')
+                const user = localStorage.getItem('user')
+                if (!token || !user) { window.location.href = 'login.html'; return }
+                this.user = JSON.parse(user)
+                axios.defaults.headers.common.Authorization = 'Bearer ' + token
+                axios.interceptors.response.use(r => r, e => {
+                    if (e.response && e.response.status === 401) this.logout()
+                    return Promise.reject(e)
+                })
+            },
+            async loadAll() { await Promise.all([this.loadDashboard(), this.loadUsers(), this.loadClubs(), this.loadActivities(), this.loadNotices()]) },
+            switchPage(p) { this.page = p; if (p === 'home') this.$nextTick(this.drawCharts) },
+            async loadDashboard() {
+                const res = await axios.get('/api/dashboard/stats')
+                this.dashboard = res.data.data || {}
+                this.stats = [
+                    {label: '用户总数', value: this.dashboard.userCount || 0, color: '#3157d5'},
+                    {label: '社团总数', value: this.dashboard.clubCount || 0, color: '#16a065'},
+                    {label: '活动总数', value: this.dashboard.activityCount || 0, color: '#d99a19'},
+                    {label: '成员总数', value: this.dashboard.memberCount || 0, color: '#5b6472'},
+                    {label: '申请数量', value: this.dashboard.applyCount || 0, color: '#8b5cf6'},
+                    {label: '公告数量', value: this.dashboard.noticeCount || 0, color: '#d94b3d'}
+                ]
+                this.$nextTick(this.drawCharts)
             },
             async loadUsers() {
-                let url = '/api/user/list';
-                if (this.userFilter !== '') {
-                    url = '/api/user/byRole?role=' + this.userFilter
-                }
-                ;const res = await axios.get(url);
-                this.users = res.data.data || []
+                const params = {...this.userQuery, role: this.userQuery.role || undefined}
+                const res = await axios.get('/api/user/list', {params})
+                this.users = res.data.data || {records: [], total: 0}
             },
-            editUser(u) {
-                this.editUserForm = {...u};
-                this.showUserModal = true
+            async loadClubs() {
+                const res = await axios.get('/api/club/list', {params: this.clubQuery})
+                this.clubs = res.data.data || {records: [], total: 0}
+            },
+            async loadActivities() {
+                const res = await axios.get('/api/activity/list', {params: this.activityQuery})
+                this.activities = res.data.data || {records: [], total: 0}
+            },
+            async loadNotices() {
+                const res = await axios.get('/api/notice/list')
+                this.notices = res.data.data || []
+            },
+            searchUsers() { this.userQuery.page = 1; this.loadUsers() },
+            searchClubs() { this.clubQuery.page = 1; this.loadClubs() },
+            searchActivities() { this.activityQuery.page = 1; this.loadActivities() },
+            changePage(type, delta) {
+                const q = type === 'users' ? this.userQuery : type === 'clubs' ? this.clubQuery : this.activityQuery
+                q.page += delta
+                if (type === 'users') this.loadUsers()
+                if (type === 'clubs') this.loadClubs()
+                if (type === 'activities') this.loadActivities()
+            },
+            pageCount(box) { return Math.max(1, Math.ceil((box.total || 0) / this.userQuery.pageSize)) },
+            editUser(u) { this.editUserForm = {...u}; this.showUserModal = true },
+            async uploadAvatar(e) {
+                const file = e.target.files[0]
+                if (!file) return
+                const form = new FormData()
+                form.append('file', file)
+                const res = await axios.post('/api/upload/image', form)
+                if (res.data.code === 200) this.editUserForm.avatar = res.data.data.url
+                else alert(res.data.msg || '上传失败')
             },
             async saveUser() {
-                try {
-                    await axios.put('/api/user/update', this.editUserForm);
-                    this.showUserModal = false;
-                    this.loadUsers();
-                    alert('保存成功')
-                } catch (e) {
-                    alert('保存失败')
-                }
+                await axios.put('/api/user/update', this.editUserForm)
+                this.showUserModal = false
+                await this.loadUsers()
+                alert('保存成功')
             },
-            async toggleUserStatus(u) {
-                const s = u.status === 1 ? 0 : 1;
-                await axios.put('/api/user/status/' + u.id + '?status=' + s);
-                this.loadUsers()
-            },
-            async deleteUser(u) {
-                if (!confirm('确定删除用户"' + u.username + '"？')) return;
-                await axios.delete('/api/user/delete/' + u.id);
-                this.loadUsers()
-            },
-            editClub(c) {
-                this.clubForm = {...c};
-                this.showClubModal = true
-            },
-            async saveClub() {
-                try {
-                    if (this.clubForm.id) {
-                        await axios.put('/api/club/update', this.clubForm)
-                    } else {
-                        await axios.post('/api/club/add', this.clubForm)
-                    }
-                    ;this.showClubModal = false;
-                    this.loadAll();
-                    alert('保存成功')
-                } catch (e) {
-                    alert('保存失败')
-                }
-            },
-            async toggleClubStatus(c) {
-                const s = c.status === 1 ? 0 : 1;
-                await axios.put('/api/club/status/' + c.id + '?status=' + s);
-                this.loadAll()
-            },
-            async deleteClub(c) {
-                if (!confirm('确定删除社团"' + c.clubName + '"？')) return;
-                await axios.delete('/api/club/delete/' + c.id);
-                this.loadAll()
-            },
-            openNoticeModal() {
-                this.noticeForm = {title: '', content: ''};
-                this.showNoticeModal = true
-            },
-            editNotice(n) {
-                this.noticeForm = {...n};
-                this.showNoticeModal = true
-            },
+            async toggleUserStatus(u) { await axios.put('/api/user/status/' + u.id + '?status=' + (u.status === 1 ? 0 : 1)); this.loadUsers() },
+            async deleteUser(u) { if (confirm('确定删除用户 "' + u.username + '"？')) { await axios.delete('/api/user/delete/' + u.id); this.loadUsers() } },
+            async toggleClubStatus(c) { await axios.put('/api/club/status/' + c.id + '?status=' + (c.status === 1 ? 0 : 1)); this.loadClubs(); this.loadDashboard() },
+            async deleteClub(c) { if (confirm('确定删除社团 "' + c.clubName + '"？')) { await axios.delete('/api/club/delete/' + c.id); this.loadClubs(); this.loadDashboard() } },
+            async deleteAct(a) { if (confirm('确定删除活动 "' + a.activityName + '"？')) { await axios.delete('/api/activity/delete/' + a.id); this.loadActivities(); this.loadDashboard() } },
+            openNoticeModal() { this.noticeForm = {title: '', content: ''}; this.showNoticeModal = true },
+            editNotice(n) { this.noticeForm = {...n}; this.showNoticeModal = true },
             async saveNotice() {
-                try {
-                    if (this.noticeForm.id) {
-                        await axios.put('/api/notice/update', this.noticeForm)
-                    } else {
-                        await axios.post('/api/notice/add', {...this.noticeForm, publisherId: this.user.id})
-                    }
-                    ;this.showNoticeModal = false;
-                    this.loadAll();
-                    alert('保存成功')
-                } catch (e) {
-                    alert('保存失败')
-                }
+                if (this.noticeForm.id) await axios.put('/api/notice/update', this.noticeForm)
+                else await axios.post('/api/notice/add', {...this.noticeForm, publisherId: this.user.id})
+                this.showNoticeModal = false
+                this.loadNotices(); this.loadDashboard()
             },
-            async deleteNotice(n) {
-                if (!confirm('确定删除？')) return;
-                await axios.delete('/api/notice/delete/' + n.id);
-                this.loadAll()
+            async deleteNotice(n) { if (confirm('确定删除公告？')) { await axios.delete('/api/notice/delete/' + n.id); this.loadNotices(); this.loadDashboard() } },
+            drawCharts() {
+                if (this.page !== 'home' || !window.echarts) return
+                this.pie('roleChart', this.mapStats(this.dashboard.roleStats, {1: '学生', 2: '社团负责人', 3: '管理员', 0: '未知'}))
+                this.pie('clubChart', this.mapStats(this.dashboard.clubTypeStats))
+                this.pie('activityChart', this.mapStats(this.dashboard.activityStatusStats, {1: '未开始', 2: '进行中', 3: '已结束', 0: '未知'}))
             },
-            async deleteAct(a) {
-                if (!confirm('确定删除？')) return;
-                await axios.delete('/api/activity/delete/' + a.id);
-                this.loadAll()
+            pie(id, data) {
+                const el = document.getElementById(id)
+                if (!el) return
+                echarts.init(el).setOption({tooltip: {trigger: 'item'}, series: [{type: 'pie', radius: ['45%', '70%'], data}]})
             },
-            logout() {
-                localStorage.removeItem('user');
-                window.location.href = 'login.html'
-            }
+            mapStats(obj, labels = {}) { return Object.entries(obj || {}).map(([k, v]) => ({name: labels[k] || k, value: v})) },
+            roleText(role) { return {1: '学生', 2: '社团负责人', 3: '管理员'}[role] || '未知' },
+            roleClass(role) { return {1: 'bg-info', 2: 'bg-success', 3: 'bg-danger'}[role] || 'bg-secondary' },
+            activityText(status) { return {1: '未开始', 2: '进行中', 3: '已结束'}[status] || '未知' },
+            activityClass(status) { return {1: 'bg-warning', 2: 'bg-primary', 3: 'bg-secondary'}[status] || 'bg-secondary' },
+            logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html' }
         }
     }).mount('#app')
 </script>

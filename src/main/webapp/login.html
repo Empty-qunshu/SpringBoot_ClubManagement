@@ -1,63 +1,84 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>社团管理平台登录</title>
     <link href="bootstrap5/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap5/font/bootstrap-icons.css" rel="stylesheet">
     <script src="bootstrap5/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/vue@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         body {
             margin: 0;
-            height: 100vh;
-            background: #f5f7fa;
+            min-height: 100vh;
+            background: #eef2f7;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
         }
 
-        .container-full {
-            height: 100vh;
+        .login-shell {
+            min-height: 100vh;
         }
 
-        .left-panel {
-            background: linear-gradient(135deg, #4e73df, #36b9cc);
-            color: white;
+        .brand-panel {
+            background: linear-gradient(135deg, #3157d5, #12a8a8);
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 48px;
+        }
+
+        .brand-panel h1 {
+            font-size: 48px;
+            font-weight: 700;
         }
 
         .login-card {
-            width: 360px;
-            padding: 40px;
-            border-radius: 20px;
-            background: white;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 380px;
+            padding: 32px;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 16px 48px rgba(35, 48, 75, .12);
         }
 
-        .login-btn {
-            border-radius: 10px;
+        .form-control {
+            min-height: 44px;
         }
     </style>
 </head>
 <body>
-<div id="app" class="container-fluid container-full">
-    <div class="row h-100">
-        <div class="col-md-7 d-none d-md-flex left-panel">
-            <div class="text-center">
-                <h1>Neuedu</h1>
-                <p>大连东软信息学院</p>
+<div id="app" class="container-fluid login-shell">
+    <div class="row min-vh-100">
+        <div class="col-lg-7 d-none d-lg-flex brand-panel">
+            <div>
+                <h1>社团管理平台</h1>
+                <p class="fs-5 mt-3 mb-0">统一管理社团、成员、活动、招新与通知公告</p>
             </div>
         </div>
-        <div class="col-md-5 d-flex align-items-center justify-content-center">
+        <div class="col-lg-5 d-flex align-items-center justify-content-center p-4">
             <div class="login-card">
-                <h4 class="text-center">欢迎使用</h4>
-                <h2 class="text-center mb-4 fw-bold">社团管理平台</h2>
-                <div class="mb-3"><input type="text" class="form-control" placeholder="账号" v-model="username"></div>
-                <div class="mb-3"><input type="password" class="form-control" placeholder="密码" v-model="password">
+                <div class="text-center mb-4">
+                    <i class="bi bi-people-fill fs-1 text-primary"></i>
+                    <h3 class="mt-2 mb-1">欢迎登录</h3>
+                    <small class="text-muted">请输入账号和密码</small>
                 </div>
-                <button class="btn btn-primary w-100 login-btn" @click="login">登录</button>
-                <div class="text-center mt-3"><span>没有账号？</span><a href="register.html"
-                                                                       class="text-primary">去注册</a></div>
+                <div class="mb-3">
+                    <label class="form-label">账号</label>
+                    <input class="form-control" v-model.trim="username" autocomplete="username" @keyup.enter="login">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-control" v-model="password" autocomplete="current-password" @keyup.enter="login">
+                </div>
+                <button class="btn btn-primary w-100" :disabled="loading" @click="login">
+                    <span v-if="loading" class="spinner-border spinner-border-sm me-1"></span>
+                    登录
+                </button>
+                <div class="text-center mt-3">
+                    <span class="text-muted">没有账号？</span><a href="register.html">去注册</a>
+                </div>
             </div>
         </div>
     </div>
@@ -66,39 +87,37 @@
     const {createApp} = Vue
     createApp({
         data() {
-            return {username: '', password: ''}
+            return {username: '', password: '', loading: false}
         },
         methods: {
-            login() {
+            async login() {
                 if (!this.username || !this.password) {
-                    alert("请输入账号和密码");
+                    alert('请输入账号和密码')
                     return
                 }
-                axios.post("/api/user/login", {username: this.username, password: this.password})
-                    .then(res => {
-                        if (res.data.code === 200) {
-                            alert("登录成功")
-                            localStorage.setItem("user", JSON.stringify(res.data.data))
-                            const user = res.data.data
-                            if (user.role === 1) {
-                                window.location.href = "Student.html"
-                            } else if (user.role === 2) {
-                                window.location.href = "Teacher.html"
-                            } else if (user.role === 3) {
-                                window.location.href = "ADHome.html"
-                            } else {
-                                alert("未知身份，请联系管理员")
-                            }
-                        } else {
-                            alert(res.data.message || res.data.msg || "登录失败")
-                        }
-                    }).catch(err => {
-                    console.error(err);
-                    alert("请求失败，请检查后端")
-                })
+                this.loading = true
+                try {
+                    const res = await axios.post('/api/user/login', {username: this.username, password: this.password})
+                    if (res.data.code === 200) {
+                        const token = res.data.token || res.data.data?.token
+                        const user = res.data.data
+                        localStorage.setItem('token', token)
+                        localStorage.setItem('user', JSON.stringify(user))
+                        if (user.role === 1) window.location.href = 'Student.html'
+                        else if (user.role === 2) window.location.href = 'Teacher.html'
+                        else if (user.role === 3) window.location.href = 'ADHome.html'
+                        else alert('未知身份，请联系管理员')
+                    } else {
+                        alert(res.data.message || res.data.msg || '登录失败')
+                    }
+                } catch (e) {
+                    alert(e.response?.data?.msg || '请求失败，请检查后端服务')
+                } finally {
+                    this.loading = false
+                }
             }
         }
-    }).mount("#app")
+    }).mount('#app')
 </script>
 </body>
 </html>
