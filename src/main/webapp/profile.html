@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>个人信息 - 社团管理平台</title>
+    <link href="bootstrap5/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="bootstrap5/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body { margin: 0; min-height: 100vh; background: #f3f6fb; font-family: "Microsoft YaHei", Arial, sans-serif; color: #263142; }
+        .topbar { height: 58px; background: #263142; color: #fff; display: flex; align-items: center; padding: 0 24px; }
+        .page { max-width: 1100px; margin: 28px auto; padding: 0 20px; }
+        .profile-card { background: #fff; border-radius: 8px; box-shadow: 0 10px 30px rgba(36,48,71,.08); overflow: hidden; }
+        .profile-head { padding: 28px; background: linear-gradient(135deg, #3157d5, #16895d); color: #fff; display: flex; align-items: center; gap: 20px; }
+        .avatar-lg { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; background: #fff; border: 4px solid rgba(255,255,255,.8); }
+        .avatar-action input { display: none; }
+        .role-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.18); color: #fff; font-size: 13px; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; padding: 24px; }
+        .info-item { border: 1px solid #e7ecf4; border-radius: 8px; padding: 14px 16px; background: #fbfcff; }
+        .info-item small { display: block; color: #7b8797; margin-bottom: 6px; }
+        .info-item strong { color: #263142; font-weight: 600; word-break: break-all; }
+        .action-bar { padding: 0 24px 24px; display: flex; gap: 10px; justify-content: flex-end; }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="topbar">
+        <span class="fw-bold"><i class="bi bi-person-circle me-2"></i>个人信息</span>
+        <button class="btn btn-outline-light btn-sm ms-auto" @click="goBack"><i class="bi bi-arrow-left"></i> 返回</button>
+    </div>
+
+    <main class="page">
+        <div class="profile-card">
+            <div class="profile-head">
+                <img :src="user.avatar || 'images/logo.png'" class="avatar-lg" alt="">
+                <div>
+                    <h3 class="mb-1">{{user.realName || user.username}}</h3>
+                    <div class="mb-2">@{{user.username}}</div>
+                    <span class="role-badge"><i class="bi bi-award"></i>{{roleText(user.role)}}</span>
+                    <label class="btn btn-light btn-sm mt-3 avatar-action" :class="{disabled: uploadLoading}">
+                        <span v-if="uploadLoading" class="spinner-border spinner-border-sm me-1"></span>
+                        <i v-else class="bi bi-cloud-upload me-1"></i>上传头像
+                        <input type="file" accept="image/*" :disabled="uploadLoading" @change="uploadAvatar">
+                    </label>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item"><small>用户ID</small><strong>{{display(user.id)}}</strong></div>
+                <div class="info-item"><small>账号</small><strong>{{display(user.username)}}</strong></div>
+                <div class="info-item"><small>真实姓名</small><strong>{{display(user.realName)}}</strong></div>
+                <div class="info-item"><small>学号</small><strong>{{display(user.studentNo)}}</strong></div>
+                <div class="info-item"><small>性别</small><strong>{{display(user.gender)}}</strong></div>
+                <div class="info-item"><small>手机</small><strong>{{display(user.phone)}}</strong></div>
+                <div class="info-item"><small>邮箱</small><strong>{{display(user.email)}}</strong></div>
+                <div class="info-item"><small>角色</small><strong>{{roleText(user.role)}}</strong></div>
+                <div class="info-item"><small>账号状态</small><strong>{{user.status === 1 ? '正常' : '停用'}}</strong></div>
+                <div class="info-item"><small>头像地址</small><strong>{{display(user.avatar)}}</strong></div>
+                <div class="info-item"><small>创建时间</small><strong>{{formatDate(user.createTime)}}</strong></div>
+                <div class="info-item"><small>更新时间</small><strong>{{formatDate(user.updateTime)}}</strong></div>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn btn-outline-secondary" @click="goBack"><i class="bi bi-arrow-left"></i> 返回上一页</button>
+                <button class="btn btn-danger" @click="logout"><i class="bi bi-box-arrow-right"></i> 退出登录</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+const {createApp} = Vue
+createApp({
+    data() {
+        return {user: {}, uploadLoading: false}
+    },
+    async mounted() {
+        this.auth()
+        await this.loadProfile()
+    },
+    methods: {
+        auth() {
+            const token = localStorage.getItem('token')
+            const user = localStorage.getItem('user')
+            if (!token || !user) {
+                window.location.href = 'login.html'
+                return
+            }
+            this.user = JSON.parse(user)
+            axios.defaults.headers.common.Authorization = 'Bearer ' + token
+            axios.interceptors.response.use(r => r, e => {
+                if (e.response && e.response.status === 401) {
+                    alert(e.response.data?.msg || '登录已过期，请重新登录')
+                    this.logout()
+                }
+                return Promise.reject(e)
+            })
+        },
+        async loadProfile() {
+            const res = await axios.get('/api/user/me')
+            if (res.data.code === 200 && res.data.data) {
+                this.user = res.data.data
+                localStorage.setItem('user', JSON.stringify(this.user))
+            }
+        },
+        async uploadAvatar(e) {
+            const file = e.target.files[0]
+            if (!file) return
+            if (!file.type.startsWith('image/')) { alert('请选择图片文件'); e.target.value = ''; return }
+            if (file.size > 5 * 1024 * 1024) { alert('图片大小不能超过 5MB'); e.target.value = ''; return }
+            this.uploadLoading = true
+            try {
+                const form = new FormData()
+                form.append('file', file)
+                const uploadRes = await axios.post('/api/upload/image', form)
+                if (uploadRes.data.code !== 200) {
+                    alert(uploadRes.data.msg || '上传失败')
+                    return
+                }
+                this.user.avatar = uploadRes.data.data.url
+                await axios.put('/api/user/update', this.user)
+                localStorage.setItem('user', JSON.stringify(this.user))
+                alert('头像已更新')
+            } catch (err) {
+                alert(err.response?.data?.msg || '上传失败')
+            } finally {
+                this.uploadLoading = false
+                e.target.value = ''
+            }
+        },
+        roleText(role) {
+            return {1: '学生', 2: '社团负责人', 3: '管理员'}[role] || '未知'
+        },
+        display(value) {
+            return value === null || value === undefined || value === '' ? '-' : value
+        },
+        formatDate(value) {
+            return value ? String(value).replace('T', ' ') : '-'
+        },
+        goBack() {
+            const role = this.user.role
+            if (role === 1) window.location.href = 'Student.html'
+            else if (role === 2) window.location.href = 'Teacher.html'
+            else if (role === 3) window.location.href = 'ADHome.html'
+            else window.history.back()
+        },
+        logout() {
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+            window.location.href = 'login.html'
+        }
+    }
+}).mount('#app')
+</script>
+</body>
+</html>

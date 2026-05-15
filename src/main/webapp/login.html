@@ -101,6 +101,10 @@
                     if (res.data.code === 200) {
                         const token = res.data.token || res.data.data?.token
                         const user = res.data.data
+                        if (!token || !user) {
+                            alert('登录响应缺少认证信息')
+                            return
+                        }
                         localStorage.setItem('token', token)
                         localStorage.setItem('user', JSON.stringify(user))
                         if (user.role === 1) window.location.href = 'Student.html'

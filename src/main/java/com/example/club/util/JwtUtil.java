@@ -32,4 +32,11 @@ public class JwtUtil {
     public static Claims parse(String token) {
         return Jwts.parser().verifyWith(KEY).build().parseSignedClaims(token).getPayload();
     }
+
+    public static Integer getUserId(Claims claims) {
+        if (claims == null || claims.getSubject() == null) {
+            return null;
+        }
+        return Integer.valueOf(claims.getSubject());
+    }
 }

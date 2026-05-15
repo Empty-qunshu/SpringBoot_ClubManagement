@@ -5,9 +5,11 @@ import com.example.club.mapper.ClubApplyMapper;
 import com.example.club.mapper.RecruitmentMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class ClubApplyService {
@@ -22,6 +24,19 @@ public class ClubApplyService {
 
     public List<ClubApply> findAll() {
         return clubApplyMapper.selectAll();
+    }
+
+    public List<ClubApply> search(Integer status, String keyword) {
+        List<ClubApply> applies = status == null ? clubApplyMapper.selectAll() : clubApplyMapper.selectByStatus(status);
+        if (!StringUtils.hasText(keyword)) return applies;
+        String kw = keyword.toLowerCase(Locale.ROOT);
+        return applies.stream()
+                .filter(apply -> contains(apply.getUserId(), kw)
+                        || contains(apply.getClubId(), kw)
+                        || contains(apply.getRecruitmentId(), kw)
+                        || contains(apply.getApplyReason(), kw)
+                        || contains(apply.getPersonalStrength(), kw))
+                .toList();
     }
 
     public ClubApply findById(Integer id) {
@@ -57,5 +72,9 @@ public class ClubApplyService {
 
     public List<ClubApply> findPendingByClubId(Integer clubId) {
         return clubApplyMapper.selectByClubIdAndStatus(clubId, 0);
+    }
+
+    private boolean contains(Object value, String keyword) {
+        return value != null && String.valueOf(value).toLowerCase(Locale.ROOT).contains(keyword);
     }
 }

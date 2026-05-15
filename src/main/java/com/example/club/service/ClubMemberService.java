@@ -6,11 +6,13 @@ import com.example.club.mapper.ClubMapper;
 import com.example.club.mapper.ClubMemberMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
@@ -26,6 +28,21 @@ public class ClubMemberService {
 
     public List<ClubMember> findAll() {
         return memberMapper.selectAll();
+    }
+
+    public List<ClubMember> search(Integer status, String keyword) {
+        List<ClubMember> members = memberMapper.selectAll();
+        if (status != null) {
+            members = members.stream().filter(member -> status.equals(member.getStatus())).toList();
+        }
+        if (!StringUtils.hasText(keyword)) return members;
+        String kw = keyword.toLowerCase(Locale.ROOT);
+        return members.stream()
+                .filter(member -> contains(member.getId(), kw)
+                        || contains(member.getClubId(), kw)
+                        || contains(member.getUserId(), kw)
+                        || contains(member.getMemberRole(), kw))
+                .toList();
     }
 
     @Transactional
@@ -74,5 +91,9 @@ public class ClubMemberService {
             }
         }
         return result;
+    }
+
+    private boolean contains(Object value, String keyword) {
+        return value != null && String.valueOf(value).toLowerCase(Locale.ROOT).contains(keyword);
     }
 }

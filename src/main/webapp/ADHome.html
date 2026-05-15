@@ -22,6 +22,9 @@
         .chart-box { height: 320px; }
         .toolbar { background: #fff; border-radius: 8px; padding: 14px; box-shadow: 0 6px 20px rgba(36, 48, 71, .06); }
         .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #e8edf5; }
+        .avatar-link { border: 0; padding: 0; background: transparent; line-height: 0; }
+        .avatar-link:hover .avatar { box-shadow: 0 0 0 3px rgba(255,255,255,.35); }
+        .empty { padding: 36px 16px; color: #7b8797; text-align: center; background: #fff; border-radius: 8px; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(17, 24, 39, .45); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .modal-box { background: #fff; border-radius: 8px; padding: 24px; width: 560px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 64px rgba(17, 24, 39, .24); }
     </style>
@@ -31,7 +34,7 @@
     <nav class="navbar px-3 d-flex align-items-center">
         <span class="fw-bold fs-5"><i class="bi bi-shield-fill-check me-2"></i>社团管理平台 - 管理员</span>
         <div class="ms-auto d-flex align-items-center">
-            <img :src="user.avatar || 'images/logo.png'" class="avatar me-2" alt="avatar">
+            <button class="avatar-link me-2" @click="goProfile" title="查看个人信息"><img :src="user.avatar || 'images/logo.png'" class="avatar" alt="avatar"></button>
             <span class="me-3">{{user.realName || user.username}}</span>
             <button class="btn btn-outline-light btn-sm" @click="logout"><i class="bi bi-box-arrow-right"></i> 退出</button>
         </div>
@@ -149,11 +152,17 @@
                 <h5 class="mb-0">公告管理</h5>
                 <button class="btn btn-danger btn-sm" @click="openNoticeModal()"><i class="bi bi-plus-lg"></i> 发布公告</button>
             </div>
-            <div v-for="n in notices" :key="n.id" class="card p-3 mb-2">
+            <div class="toolbar d-flex gap-2 mb-3">
+                <input class="form-control" style="max-width:300px" placeholder="搜索公告标题、内容" v-model.trim="noticeQuery.keyword" @keyup.enter="searchNotices">
+                <button class="btn btn-outline-danger" @click="searchNotices"><i class="bi bi-search"></i> 搜索</button>
+            </div>
+            <div v-for="n in notices.records" :key="n.id" class="card p-3 mb-2">
                 <div class="d-flex justify-content-between"><strong>{{n.title}}</strong><small class="text-muted">{{n.createTime}}</small></div>
                 <p class="mb-2 small">{{n.content}}</p>
                 <div><button class="btn btn-outline-primary btn-sm me-1" @click="editNotice(n)">编辑</button><button class="btn btn-outline-danger btn-sm" @click="deleteNotice(n)">删除</button></div>
             </div>
+            <div v-if="notices.records.length===0" class="empty">暂无公告数据</div>
+            <pager :box="notices" :query="noticeQuery" @turn="changePage('notices', $event)"></pager>
         </section>
     </main>
 
@@ -198,17 +207,24 @@
         data() {
             return {
                 user: {}, page: 'home', stats: [], dashboard: {},
-                users: {records: [], total: 0}, clubs: {records: [], total: 0}, activities: {records: [], total: 0}, notices: [],
+                users: {records: [], total: 0}, clubs: {records: [], total: 0}, activities: {records: [], total: 0}, notices: {records: [], total: 0},
                 userQuery: {keyword: '', role: '', page: 1, pageSize: 8},
                 clubQuery: {keyword: '', page: 1, pageSize: 6},
                 activityQuery: {keyword: '', page: 1, pageSize: 6},
+                noticeQuery: {keyword: '', page: 1, pageSize: 6},
                 showUserModal: false, editUserForm: {},
-                showNoticeModal: false, noticeForm: {}
+                showNoticeModal: false, noticeForm: {},
+                charts: {}
             }
         },
         async mounted() {
             this.initAuth()
+            await this.refreshCurrentUser()
             await this.loadAll()
+            window.addEventListener('resize', this.resizeCharts)
+        },
+        unmounted() {
+            window.removeEventListener('resize', this.resizeCharts)
         },
         methods: {
             initAuth() {
@@ -218,9 +234,19 @@
                 this.user = JSON.parse(user)
                 axios.defaults.headers.common.Authorization = 'Bearer ' + token
                 axios.interceptors.response.use(r => r, e => {
-                    if (e.response && e.response.status === 401) this.logout()
+                    if (e.response && e.response.status === 401) {
+                        alert(e.response.data?.msg || '登录已过期，请重新登录')
+                        this.logout()
+                    }
                     return Promise.reject(e)
                 })
+            },
+            async refreshCurrentUser() {
+                const res = await axios.get('/api/user/me')
+                if (res.data.code === 200 && res.data.data) {
+                    this.user = res.data.data
+                    localStorage.setItem('user', JSON.stringify(this.user))
+                }
             },
             async loadAll() { await Promise.all([this.loadDashboard(), this.loadUsers(), this.loadClubs(), this.loadActivities(), this.loadNotices()]) },
             switchPage(p) { this.page = p; if (p === 'home') this.$nextTick(this.drawCharts) },
@@ -251,29 +277,34 @@
                 this.activities = res.data.data || {records: [], total: 0}
             },
             async loadNotices() {
-                const res = await axios.get('/api/notice/list')
-                this.notices = res.data.data || []
+                const res = await axios.get('/api/notice/list', {params: this.noticeQuery})
+                this.notices = res.data.data || {records: [], total: 0}
             },
             searchUsers() { this.userQuery.page = 1; this.loadUsers() },
             searchClubs() { this.clubQuery.page = 1; this.loadClubs() },
             searchActivities() { this.activityQuery.page = 1; this.loadActivities() },
+            searchNotices() { this.noticeQuery.page = 1; this.loadNotices() },
             changePage(type, delta) {
-                const q = type === 'users' ? this.userQuery : type === 'clubs' ? this.clubQuery : this.activityQuery
-                q.page += delta
+                const q = type === 'users' ? this.userQuery : type === 'clubs' ? this.clubQuery : type === 'activities' ? this.activityQuery : this.noticeQuery
+                q.page = Math.max(1, q.page + delta)
                 if (type === 'users') this.loadUsers()
                 if (type === 'clubs') this.loadClubs()
                 if (type === 'activities') this.loadActivities()
+                if (type === 'notices') this.loadNotices()
             },
-            pageCount(box) { return Math.max(1, Math.ceil((box.total || 0) / this.userQuery.pageSize)) },
+            pageCount(box) { return Math.max(1, box.totalPages || Math.ceil((box.total || 0) / this.userQuery.pageSize)) },
             editUser(u) { this.editUserForm = {...u}; this.showUserModal = true },
             async uploadAvatar(e) {
                 const file = e.target.files[0]
                 if (!file) return
+                if (!file.type.startsWith('image/')) { alert('请选择图片文件'); e.target.value = ''; return }
+                if (file.size > 5 * 1024 * 1024) { alert('图片大小不能超过 5MB'); e.target.value = ''; return }
                 const form = new FormData()
                 form.append('file', file)
                 const res = await axios.post('/api/upload/image', form)
                 if (res.data.code === 200) this.editUserForm.avatar = res.data.data.url
                 else alert(res.data.msg || '上传失败')
+                e.target.value = ''
             },
             async saveUser() {
                 await axios.put('/api/user/update', this.editUserForm)
@@ -292,6 +323,7 @@
                 if (this.noticeForm.id) await axios.put('/api/notice/update', this.noticeForm)
                 else await axios.post('/api/notice/add', {...this.noticeForm, publisherId: this.user.id})
                 this.showNoticeModal = false
+                this.noticeQuery.page = 1
                 this.loadNotices(); this.loadDashboard()
             },
             async deleteNotice(n) { if (confirm('确定删除公告？')) { await axios.delete('/api/notice/delete/' + n.id); this.loadNotices(); this.loadDashboard() } },
@@ -304,13 +336,23 @@
             pie(id, data) {
                 const el = document.getElementById(id)
                 if (!el) return
-                echarts.init(el).setOption({tooltip: {trigger: 'item'}, series: [{type: 'pie', radius: ['45%', '70%'], data}]})
+                if (this.charts[id]) this.charts[id].dispose()
+                const chart = echarts.init(el)
+                this.charts[id] = chart
+                chart.setOption({
+                    tooltip: {trigger: 'item'},
+                    legend: {bottom: 0},
+                    title: data.length ? undefined : {text: '暂无数据', left: 'center', top: '42%', textStyle: {fontSize: 14, color: '#7b8797'}},
+                    series: [{type: 'pie', radius: ['45%', '70%'], center: ['50%', '46%'], data}]
+                })
             },
+            resizeCharts() { Object.values(this.charts).forEach(chart => chart.resize()) },
             mapStats(obj, labels = {}) { return Object.entries(obj || {}).map(([k, v]) => ({name: labels[k] || k, value: v})) },
             roleText(role) { return {1: '学生', 2: '社团负责人', 3: '管理员'}[role] || '未知' },
             roleClass(role) { return {1: 'bg-info', 2: 'bg-success', 3: 'bg-danger'}[role] || 'bg-secondary' },
             activityText(status) { return {1: '未开始', 2: '进行中', 3: '已结束'}[status] || '未知' },
             activityClass(status) { return {1: 'bg-warning', 2: 'bg-primary', 3: 'bg-secondary'}[status] || 'bg-secondary' },
+            goProfile() { window.location.href = 'profile.html' },
             logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html' }
         }
     }).mount('#app')

@@ -1,6 +1,7 @@
 package com.example.club.controller;
 
 import com.example.club.entity.Notice;
+import com.example.club.entity.PageResult;
 import com.example.club.entity.Result;
 import com.example.club.service.NoticeService;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin
@@ -25,8 +27,14 @@ public class NoticeController {
     }
 
     @GetMapping("/list")
-    public Result list() {
-        return Result.success(noticeService.findAll());
+    public Result list(@RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) Integer page,
+                       @RequestParam(required = false) Integer pageSize) {
+        var notices = noticeService.search(keyword);
+        if (page != null || pageSize != null) {
+            return Result.success(PageResult.of(notices, page, pageSize));
+        }
+        return Result.success(notices);
     }
 
     @GetMapping("/get/{id}")

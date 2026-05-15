@@ -40,6 +40,17 @@ public class Result {
         return result;
     }
 
+    public static Result error(Integer code, String msg) {
+        Result result = new Result();
+        result.code = code;
+        result.msg = msg;
+        return result;
+    }
+
+    public static Result unauthorized(String msg) {
+        return error(401, msg);
+    }
+
 
 
 }

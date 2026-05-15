@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,13 @@ public class UserController {
     public Result getById(@PathVariable Integer id) {
         User user = userService.findById(id);
         return user != null ? Result.success(userService.withoutPassword(user)) : Result.error("用户不存在");
+    }
+
+    @GetMapping("/me")
+    public Result me(HttpServletRequest request) {
+        Integer loginUserId = (Integer) request.getAttribute("loginUserId");
+        User user = userService.findById(loginUserId);
+        return user != null ? Result.success(userService.withoutPassword(user)) : Result.unauthorized("登录用户不存在");
     }
 
     @PutMapping("/update")

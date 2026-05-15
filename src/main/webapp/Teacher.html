@@ -17,12 +17,34 @@
         .sidebar { width: var(--sidebar-w); background: #fff; min-height: calc(100vh - 56px); position: fixed; top: 56px; left: 0; box-shadow: 2px 0 12px rgba(36,48,71,.08); }
         .sidebar .nav-link { color: #526071; padding: 13px 20px; border-left: 3px solid transparent; cursor: pointer; }
         .sidebar .nav-link:hover, .sidebar .nav-link.active { background: #ecfff6; color: var(--primary); border-left-color: var(--primary); }
-        .main { margin-left: var(--sidebar-w); padding: 24px; min-height: calc(100vh - 56px); }
-        .card, .stat-card, .toolbar { border: 0; border-radius: 8px; box-shadow: 0 6px 20px rgba(36,48,71,.07); }
+        .main { margin-left: var(--sidebar-w); padding: 24px 34px; min-height: calc(100vh - 56px); }
+        .card, .stat-card, .toolbar, .table-card { border: 0; border-radius: 8px; box-shadow: 0 6px 20px rgba(36,48,71,.07); }
         .toolbar { background: #fff; padding: 14px; }
         .chart-box { height: 300px; }
         .avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
-        .cover { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; background: #e8edf5; }
+        .avatar-link { border: 0; padding: 0; background: transparent; line-height: 0; }
+        .avatar-link:hover .avatar { box-shadow: 0 0 0 3px rgba(255,255,255,.35); }
+        .page-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+        .club-switcher { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+        .club-tab { border: 1px solid #dfe7ef; background: #fff; color: #526071; border-radius: 8px; padding: 10px 14px; min-width: 150px; text-align: left; transition: .18s ease; }
+        .club-tab:hover { border-color: #9fd7bd; color: var(--primary); transform: translateY(-1px); box-shadow: 0 8px 18px rgba(22,137,93,.12); }
+        .club-tab.active { border-color: var(--primary); background: #ecfff6; color: var(--primary); box-shadow: 0 8px 18px rgba(22,137,93,.14); }
+        .club-tab strong { display: block; font-size: 14px; }
+        .club-tab small { color: #7b8797; }
+        .empty { padding: 42px 16px; color: #7b8797; text-align: center; background: #fff; border-radius: 8px; box-shadow: 0 6px 20px rgba(36,48,71,.06); }
+        .table-card { background: #fff; overflow: hidden; }
+        .table-card .table { margin-bottom: 0; }
+        .table-card th { background: #f7f9fc; color: #526071; font-weight: 600; white-space: nowrap; }
+        .table-card td { vertical-align: middle; }
+        .notice-compose { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 6px 20px rgba(36,48,71,.07); }
+        .notice-compose-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+        .notice-compose-icon { width: 42px; height: 42px; border-radius: 8px; background: #ecfff6; color: var(--primary); display: inline-flex; align-items: center; justify-content: center; font-size: 22px; }
+        .notice-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+        .notice-card { background: #fff; border: 1px solid #e6edf4; border-radius: 8px; padding: 16px; min-height: 178px; display: flex; flex-direction: column; transition: .18s ease; box-shadow: 0 6px 18px rgba(36,48,71,.05); }
+        .notice-card:hover { border-color: #b9dec9; box-shadow: 0 10px 22px rgba(22,137,93,.12); transform: translateY(-1px); }
+        .notice-card-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+        .notice-card-content { color: #657184; line-height: 1.7; margin: 12px 0 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .metric-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; background: #ecfff6; color: var(--primary); font-size: 13px; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(17,24,39,.45); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .modal-box { background: #fff; border-radius: 8px; padding: 24px; width: 600px; max-height: 88vh; overflow-y: auto; }
     </style>
@@ -32,11 +54,12 @@
     <nav class="navbar px-3 d-flex align-items-center">
         <span class="fw-bold fs-5"><i class="bi bi-person-workspace me-2"></i>社团管理平台 - 负责人</span>
         <div class="ms-auto d-flex align-items-center">
-            <img :src="user.avatar || 'images/logo.png'" class="avatar me-2" alt="">
+            <button class="avatar-link me-2" @click="goProfile" title="查看个人信息"><img :src="user.avatar || 'images/logo.png'" class="avatar" alt=""></button>
             <span class="me-3">{{user.realName || user.username}}</span>
             <button class="btn btn-outline-light btn-sm" @click="logout"><i class="bi bi-box-arrow-right"></i> 退出</button>
         </div>
     </nav>
+
     <aside class="sidebar">
         <div class="p-3 border-bottom"><small class="text-muted">负责人菜单</small></div>
         <div class="nav-link" :class="{active:page==='home'}" @click="switchPage('home')"><i class="bi bi-house me-2"></i>首页</div>
@@ -47,38 +70,437 @@
         <div class="nav-link" :class="{active:page==='notice'}" @click="switchPage('notice')"><i class="bi bi-bell me-2"></i>发布公告</div>
         <div class="nav-link" :class="{active:page==='apply'}" @click="switchPage('apply')"><i class="bi bi-send-check me-2"></i>申请审核</div>
     </aside>
+
     <main class="main">
         <section v-if="page==='home'">
             <h4 class="mb-4">欢迎回来，{{user.realName || user.username}}</h4>
-            <div class="row mb-3"><div class="col-md-3 mb-3" v-for="s in homeStats" :key="s.label"><div class="stat-card card p-3 text-center"><small class="text-muted">{{s.label}}</small><h3 class="mt-2 mb-0">{{s.value}}</h3></div></div></div>
+            <div class="row mb-3">
+                <div class="col-md-3 mb-3" v-for="s in homeStats" :key="s.label">
+                    <div class="stat-card card p-3 text-center"><small class="text-muted">{{s.label}}</small><h3 class="mt-2 mb-0">{{s.value}}</h3></div>
+                </div>
+            </div>
             <div class="card p-3"><h6>社团类型统计</h6><div id="teacherChart" class="chart-box"></div></div>
         </section>
+
         <section v-if="page==='myClubs'">
-            <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="mb-0">我的社团</h5><button class="btn btn-success btn-sm" @click="openClubModal()"><i class="bi bi-plus-lg"></i> 创建社团</button></div>
-            <div class="row"><div class="col-md-4 mb-3" v-for="c in myClubs" :key="c.id"><div class="card p-3 h-100"><img :src="c.cover || 'images/admin.jpg'" class="cover mb-2" alt=""><div class="d-flex justify-content-between"><h6>{{c.clubName}}</h6><span class="badge" :class="c.status===1?'bg-success':'bg-secondary'">{{c.status===1?'正常':'停用'}}</span></div><p class="small text-muted">{{c.clubDescription}}</p><small>类型：{{c.clubType}} | 成员：{{c.memberCount}} | 地点：{{c.location}}</small><div class="mt-2"><button class="btn btn-outline-primary btn-sm me-1" @click="openClubModal(c)">编辑</button><button class="btn btn-outline-danger btn-sm" @click="deleteClub(c)">删除</button></div></div></div></div>
+            <div class="page-title">
+                <h5 class="mb-0">我的社团</h5>
+                <button class="btn btn-success btn-sm" @click="openClubModal()"><i class="bi bi-plus-lg"></i> 创建社团</button>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3" v-for="c in myClubs" :key="c.id">
+                    <div class="card p-3 h-100">
+                        <div class="d-flex justify-content-between"><h6>{{c.clubName}}</h6><span class="badge" :class="c.status===1?'bg-success':'bg-secondary'">{{c.status===1?'正常':'停用'}}</span></div>
+                        <p class="small text-muted">{{c.clubDescription}}</p>
+                        <small>类型：{{c.clubType}} | 成员：{{c.memberCount}} | 地点：{{c.location}}</small>
+                        <div class="mt-2"><button class="btn btn-outline-primary btn-sm me-1" @click="openClubModal(c)">编辑</button><button class="btn btn-outline-danger btn-sm" @click="deleteClub(c)">删除</button></div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="myClubs.length===0" class="empty">你还没有管理任何社团</div>
         </section>
+
         <section v-if="page==='recruit'">
-            <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="mb-0">招新管理</h5><button class="btn btn-success btn-sm" @click="openRecruitModal()"><i class="bi bi-plus-lg"></i> 发布招新</button></div>
-            <div class="row"><div class="col-md-6 mb-3" v-for="r in recruitments" :key="r.id"><div class="card p-3"><div class="d-flex justify-content-between"><h6>{{r.title}}</h6><span class="badge" :class="r.status===1?'bg-success':'bg-secondary'">{{r.status===1?'招新中':'已结束'}}</span></div><p class="small text-muted">{{r.content}}</p><small>已报名 {{r.currentCount}}/{{r.limitCount}}</small><div class="mt-2"><button class="btn btn-outline-primary btn-sm me-1" @click="openRecruitModal(r)">编辑</button><button class="btn btn-outline-warning btn-sm me-1" v-if="r.status===1" @click="endRecruit(r)">结束</button><button class="btn btn-outline-danger btn-sm" @click="deleteRecruit(r)">删除</button></div></div></div></div>
+            <div class="page-title">
+                <h5 class="mb-0">招新管理</h5>
+                <button class="btn btn-success btn-sm" @click="openRecruitModal()"><i class="bi bi-plus-lg"></i> 发布招新</button>
+            </div>
+            <div class="toolbar d-flex gap-2 mb-3"><input class="form-control" style="max-width:320px" placeholder="搜索招新标题、内容、要求" v-model.trim="recruitQuery.keyword" @keyup.enter="searchRecruitments"><button class="btn btn-outline-success" @click="searchRecruitments"><i class="bi bi-search"></i> 搜索</button></div>
+            <div class="row">
+                <div class="col-md-6 mb-3" v-for="r in recruitments.records" :key="r.id">
+                    <div class="card p-3">
+                        <div class="d-flex justify-content-between"><h6>{{r.title}}</h6><span class="badge" :class="r.status===1?'bg-success':'bg-secondary'">{{r.status===1?'招新中':'已结束'}}</span></div>
+                        <p class="small text-muted">{{r.content}}</p>
+                        <small>已报名 {{r.currentCount}}/{{r.limitCount}}</small>
+                        <div class="mt-2"><button class="btn btn-outline-primary btn-sm me-1" @click="openRecruitModal(r)">编辑</button><button class="btn btn-outline-warning btn-sm me-1" v-if="r.status===1" @click="endRecruit(r)">结束</button><button class="btn btn-outline-danger btn-sm" @click="deleteRecruit(r)">删除</button></div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="recruitments.records.length===0" class="empty">暂无招新信息</div>
+            <pager :box="recruitments" :query="recruitQuery" @turn="turnRecruit"></pager>
         </section>
+
         <section v-if="page==='activity'">
-            <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="mb-0">活动管理</h5><button class="btn btn-success btn-sm" @click="openActModal()"><i class="bi bi-plus-lg"></i> 发布活动</button></div>
+            <div class="page-title">
+                <h5 class="mb-0">活动管理</h5>
+                <button class="btn btn-success btn-sm" @click="openActModal()"><i class="bi bi-plus-lg"></i> 发布活动</button>
+            </div>
             <div class="toolbar d-flex gap-2 mb-3"><input class="form-control" style="max-width:320px" placeholder="搜索活动名称、地点、描述" v-model.trim="activityQuery.keyword" @keyup.enter="searchActivities"><button class="btn btn-outline-success" @click="searchActivities"><i class="bi bi-search"></i> 搜索</button></div>
-            <div class="row"><div class="col-md-4 mb-3" v-for="a in activities.records" :key="a.id"><div class="card p-3 h-100"><h6>{{a.activityName}}</h6><p class="small text-muted">{{a.description}}</p><small><i class="bi bi-geo-alt"></i> {{a.location}} | <i class="bi bi-people"></i> {{a.currentPeople}}/{{a.maxPeople}}</small><div class="mt-2"><button class="btn btn-outline-primary btn-sm me-1" @click="openActModal(a)">编辑</button><button class="btn btn-outline-danger btn-sm" @click="deleteAct(a)">删除</button></div></div></div></div>
+            <div class="row">
+                <div class="col-md-4 mb-3" v-for="a in activities.records" :key="a.id">
+                    <div class="card p-3 h-100"><h6>{{a.activityName}}</h6><p class="small text-muted">{{a.description}}</p><small><i class="bi bi-geo-alt"></i> {{a.location}} | <i class="bi bi-people"></i> {{a.currentPeople}}/{{a.maxPeople}}</small><div class="mt-2"><button class="btn btn-outline-primary btn-sm me-1" @click="openActModal(a)">编辑</button><button class="btn btn-outline-danger btn-sm" @click="deleteAct(a)">删除</button></div></div>
+                </div>
+            </div>
             <pager :box="activities" :query="activityQuery" @turn="turnActivity"></pager>
         </section>
-        <section v-if="page==='member'"><h5 class="mb-3">成员管理</h5><select class="form-select mb-3" style="max-width:260px" v-model="memberClubId" @change="loadMembers"><option value="">选择社团</option><option v-for="c in myClubs" :value="c.id" :key="c.id">{{c.clubName}}</option></select><table class="table table-hover card"><tbody><tr v-for="m in members" :key="m.id"><td>{{m.userId}}</td><td>{{roleText(m.memberRole)}}</td><td>{{m.joinTime}}</td><td><button class="btn btn-outline-primary btn-sm me-1" @click="changeRole(m)">改角色</button><button class="btn btn-outline-danger btn-sm" @click="removeMember(m)">移除</button></td></tr></tbody></table></section>
-        <section v-if="page==='notice'"><h5 class="mb-3">发布公告</h5><div class="card p-3 mb-3" style="max-width:640px"><div class="mb-3"><label>标题</label><input class="form-control" v-model="noticeForm.title"></div><div class="mb-3"><label>内容</label><textarea class="form-control" rows="4" v-model="noticeForm.content"></textarea></div><button class="btn btn-success" @click="publishNotice">发布公告</button></div><div v-for="n in notices" :key="n.id" class="card p-3 mb-2"><strong>{{n.title}}</strong><p class="small mb-2">{{n.content}}</p><button class="btn btn-outline-danger btn-sm" style="width:80px" @click="deleteNotice(n)">删除</button></div></section>
-        <section v-if="page==='apply'"><h5 class="mb-3">申请审核</h5><select class="form-select mb-3" style="max-width:260px" v-model="applyClubId" @change="loadApplies"><option value="">选择社团</option><option v-for="c in myClubs" :value="c.id" :key="c.id">{{c.clubName}}</option></select><table class="table table-hover card"><tbody><tr v-for="a in applies" :key="a.id"><td>{{a.userId}}</td><td>{{a.applyReason}}</td><td>{{statusText(a.status)}}</td><td><button v-if="a.status===0" class="btn btn-success btn-sm me-1" @click="reviewApply(a,1)">通过</button><button v-if="a.status===0" class="btn btn-danger btn-sm" @click="reviewApply(a,2)">拒绝</button></td></tr></tbody></table></section>
+
+        <section v-if="page==='member'">
+            <div class="page-title">
+                <div><h5 class="mb-1">成员管理</h5><small class="text-muted">选择社团后查看成员、调整角色或移除成员</small></div>
+                <span class="metric-pill"><i class="bi bi-people"></i>{{members.length}} 名成员</span>
+            </div>
+            <club-switcher :clubs="myClubs" :active-id="memberClubId" @select="selectMemberClub"></club-switcher>
+            <div v-if="!memberClubId" class="empty">请选择一个社团查看成员</div>
+            <div v-else-if="members.length===0" class="empty">当前社团暂无成员</div>
+            <div v-else class="table-card">
+                <table class="table table-hover align-middle">
+                    <thead><tr><th>成员ID</th><th>用户ID</th><th>成员角色</th><th>加入时间</th><th class="text-end">操作</th></tr></thead>
+                    <tbody>
+                    <tr v-for="m in members" :key="m.id">
+                        <td>{{m.id}}</td>
+                        <td>{{m.userId}}</td>
+                        <td><span class="badge bg-info">{{roleText(m.memberRole)}}</span></td>
+                        <td>{{formatDate(m.joinTime)}}</td>
+                        <td class="text-end"><button class="btn btn-outline-primary btn-sm me-1" @click="changeRole(m)">改角色</button><button class="btn btn-outline-danger btn-sm" @click="removeMember(m)">移除</button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section v-if="page==='notice'">
+            <div class="page-title">
+                <div><h5 class="mb-1">发布公告</h5><small class="text-muted">面向学生发布社团通知、活动提醒和管理公告</small></div>
+                <span class="metric-pill"><i class="bi bi-bell"></i>{{notices.length}} 条公告</span>
+            </div>
+            <div class="notice-compose mb-4">
+                <div class="notice-compose-head">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="notice-compose-icon"><i class="bi bi-pencil-square"></i></span>
+                        <div>
+                            <h6 class="mb-1">新公告</h6>
+                            <small class="text-muted">标题清晰、内容简洁，发布后会出现在学生端首页</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" @click="publishNotice"><i class="bi bi-send"></i> 发布公告</button>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 mb-3 mb-lg-0">
+                        <label class="form-label">标题</label>
+                        <input class="form-control" v-model.trim="noticeForm.title" placeholder="请输入公告标题">
+                    </div>
+                    <div class="col-lg-8">
+                        <label class="form-label">内容</label>
+                        <textarea class="form-control" rows="4" v-model.trim="noticeForm.content" placeholder="请输入公告内容"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="mb-0">已发布公告</h6>
+                <small class="text-muted">按发布时间展示</small>
+            </div>
+            <div v-if="notices.length>0" class="notice-grid">
+                <div v-for="n in notices" :key="n.id" class="notice-card">
+                    <div class="notice-card-title">
+                        <div>
+                            <span class="badge bg-success-subtle text-success mb-2">公告</span>
+                            <h6 class="mb-0">{{n.title}}</h6>
+                        </div>
+                        <button class="btn btn-light btn-sm text-danger" @click="deleteNotice(n)" title="删除公告"><i class="bi bi-trash"></i></button>
+                    </div>
+                    <p class="notice-card-content">{{n.content || '暂无公告内容'}}</p>
+                    <div class="mt-auto d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="bi bi-clock me-1"></i>{{formatDate(n.createTime)}}</small>
+                        <button class="btn btn-outline-danger btn-sm" @click="deleteNotice(n)">删除</button>
+                    </div>
+                </div>
+            </div>
+            <div v-else class="empty">暂无已发布公告</div>
+        </section>
+
+        <section v-if="page==='apply'">
+            <div class="page-title">
+                <div><h5 class="mb-1">申请审核</h5><small class="text-muted">选择社团后处理学生加入申请</small></div>
+                <span class="metric-pill"><i class="bi bi-send-check"></i>{{pendingApplyCount}} 条待审核</span>
+            </div>
+            <club-switcher :clubs="myClubs" :active-id="applyClubId" @select="selectApplyClub"></club-switcher>
+            <div v-if="!applyClubId" class="empty">请选择一个社团查看申请</div>
+            <div v-else-if="applies.length===0" class="empty">当前社团暂无申请</div>
+            <div v-else class="table-card">
+                <table class="table table-hover align-middle">
+                    <thead><tr><th>申请人</th><th>申请理由</th><th>个人优势</th><th>状态</th><th>申请时间</th><th class="text-end">操作</th></tr></thead>
+                    <tbody>
+                    <tr v-for="a in applies" :key="a.id">
+                        <td>{{a.userId}}</td>
+                        <td>{{a.applyReason}}</td>
+                        <td>{{a.personalStrength || '-'}}</td>
+                        <td><span class="badge" :class="applyStatusClass(a.status)">{{statusText(a.status)}}</span></td>
+                        <td>{{formatDate(a.applyTime)}}</td>
+                        <td class="text-end">
+                            <button v-if="a.status===0" class="btn btn-success btn-sm me-1" @click="reviewApply(a,1)">通过</button>
+                            <button v-if="a.status===0" class="btn btn-outline-danger btn-sm" @click="reviewApply(a,2)">拒绝</button>
+                            <span v-else class="text-muted">已处理</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
-    <div class="modal-overlay" v-if="showClubModal" @click.self="showClubModal=false"><div class="modal-box"><h5>{{clubForm.id?'编辑社团':'创建社团'}}</h5><img :src="clubForm.cover || 'images/admin.jpg'" class="cover mb-2" alt=""><input type="file" class="form-control mb-3" accept="image/*" @change="uploadClubCover"><div class="mb-3"><label>社团名称</label><input class="form-control" v-model="clubForm.clubName"></div><div class="mb-3"><label>描述</label><textarea class="form-control" rows="2" v-model="clubForm.clubDescription"></textarea></div><div class="row"><div class="col-md-6 mb-3"><label>类型</label><input class="form-control" v-model="clubForm.clubType"></div><div class="col-md-6 mb-3"><label>地点</label><input class="form-control" v-model="clubForm.location"></div></div><div class="mb-3"><label>联系电话</label><input class="form-control" v-model="clubForm.contactPhone"></div><div class="d-flex justify-content-end"><button class="btn btn-secondary me-2" @click="showClubModal=false">取消</button><button class="btn btn-success" @click="saveClub">保存</button></div></div></div>
-    <div class="modal-overlay" v-if="showRecruitModal" @click.self="showRecruitModal=false"><div class="modal-box"><h5>{{recruitForm.id?'编辑招新':'发布招新'}}</h5><select class="form-select mb-3" v-model="recruitForm.clubId"><option value="">请选择社团</option><option v-for="c in myClubs" :value="c.id" :key="c.id">{{c.clubName}}</option></select><input class="form-control mb-3" placeholder="标题" v-model="recruitForm.title"><textarea class="form-control mb-3" rows="2" placeholder="内容" v-model="recruitForm.content"></textarea><input class="form-control mb-3" placeholder="要求" v-model="recruitForm.requirement"><input type="number" class="form-control mb-3" placeholder="人数限制" v-model.number="recruitForm.limitCount"><div class="d-flex justify-content-end"><button class="btn btn-secondary me-2" @click="showRecruitModal=false">取消</button><button class="btn btn-success" @click="saveRecruit">保存</button></div></div></div>
-    <div class="modal-overlay" v-if="showActModal" @click.self="showActModal=false"><div class="modal-box"><h5>{{actForm.id?'编辑活动':'发布活动'}}</h5><select class="form-select mb-3" v-model="actForm.clubId"><option value="">请选择社团</option><option v-for="c in myClubs" :value="c.id" :key="c.id">{{c.clubName}}</option></select><input class="form-control mb-3" placeholder="活动名称" v-model="actForm.activityName"><textarea class="form-control mb-3" rows="2" placeholder="活动描述" v-model="actForm.description"></textarea><input class="form-control mb-3" placeholder="地点" v-model="actForm.location"><input type="number" class="form-control mb-3" placeholder="最大人数" v-model.number="actForm.maxPeople"><div class="d-flex justify-content-end"><button class="btn btn-secondary me-2" @click="showActModal=false">取消</button><button class="btn btn-success" @click="saveAct">保存</button></div></div></div>
+
+    <div class="modal-overlay" v-if="showClubModal" @click.self="showClubModal=false">
+        <div class="modal-box"><h5>{{clubForm.id?'编辑社团':'创建社团'}}</h5><div class="mb-3"><label>社团名称</label><input class="form-control" v-model="clubForm.clubName"></div><div class="mb-3"><label>描述</label><textarea class="form-control" rows="2" v-model="clubForm.clubDescription"></textarea></div><div class="row"><div class="col-md-6 mb-3"><label>类型</label><input class="form-control" v-model="clubForm.clubType"></div><div class="col-md-6 mb-3"><label>地点</label><input class="form-control" v-model="clubForm.location"></div></div><div class="mb-3"><label>联系电话</label><input class="form-control" v-model="clubForm.contactPhone"></div><div class="d-flex justify-content-end"><button class="btn btn-secondary me-2" @click="showClubModal=false">取消</button><button class="btn btn-success" @click="saveClub">保存</button></div></div>
+    </div>
+    <div class="modal-overlay" v-if="showRecruitModal" @click.self="showRecruitModal=false">
+        <div class="modal-box"><h5>{{recruitForm.id?'编辑招新':'发布招新'}}</h5><select class="form-select mb-3" v-model="recruitForm.clubId"><option value="">请选择社团</option><option v-for="c in myClubs" :value="c.id" :key="c.id">{{c.clubName}}</option></select><input class="form-control mb-3" placeholder="标题" v-model="recruitForm.title"><textarea class="form-control mb-3" rows="2" placeholder="内容" v-model="recruitForm.content"></textarea><input class="form-control mb-3" placeholder="要求" v-model="recruitForm.requirement"><input type="number" class="form-control mb-3" placeholder="人数限制" v-model.number="recruitForm.limitCount"><div class="d-flex justify-content-end"><button class="btn btn-secondary me-2" @click="showRecruitModal=false">取消</button><button class="btn btn-success" @click="saveRecruit">保存</button></div></div>
+    </div>
+    <div class="modal-overlay" v-if="showActModal" @click.self="showActModal=false">
+        <div class="modal-box"><h5>{{actForm.id?'编辑活动':'发布活动'}}</h5><select class="form-select mb-3" v-model="actForm.clubId"><option value="">请选择社团</option><option v-for="c in myClubs" :value="c.id" :key="c.id">{{c.clubName}}</option></select><input class="form-control mb-3" placeholder="活动名称" v-model="actForm.activityName"><textarea class="form-control mb-3" rows="2" placeholder="活动描述" v-model="actForm.description"></textarea><input class="form-control mb-3" placeholder="地点" v-model="actForm.location"><input type="number" class="form-control mb-3" placeholder="最大人数" v-model.number="actForm.maxPeople"><div class="d-flex justify-content-end"><button class="btn btn-secondary me-2" @click="showActModal=false">取消</button><button class="btn btn-success" @click="saveAct">保存</button></div></div>
+    </div>
 </div>
+
 <script>
-const {createApp}=Vue
-const Pager={props:['box','query'],emits:['turn'],template:`<div class="d-flex justify-content-between align-items-center mt-2"><small class="text-muted">共 {{box.total||0}} 条</small><div class="btn-group btn-group-sm"><button class="btn btn-outline-secondary" :disabled="query.page<=1" @click="$emit('turn',-1)">上一页</button><button class="btn btn-outline-secondary disabled">第 {{query.page}} 页</button><button class="btn btn-outline-secondary" :disabled="query.page>=Math.max(1,Math.ceil((box.total||0)/query.pageSize))" @click="$emit('turn',1)">下一页</button></div></div>`}
-createApp({components:{Pager},data(){return{user:{},page:'home',myClubs:[],recruitments:[],activities:{records:[],total:0},notices:[],members:[],applies:[],homeStats:[],activityQuery:{keyword:'',page:1,pageSize:6},memberClubId:'',applyClubId:'',showClubModal:false,clubForm:{},showRecruitModal:false,recruitForm:{},showActModal:false,actForm:{},noticeForm:{title:'',content:''}}},async mounted(){this.auth();await this.loadData()},methods:{auth(){const t=localStorage.getItem('token'),u=localStorage.getItem('user');if(!t||!u){location.href='login.html';return}this.user=JSON.parse(u);axios.defaults.headers.common.Authorization='Bearer '+t;axios.interceptors.response.use(r=>r,e=>{if(e.response&&e.response.status===401)this.logout();return Promise.reject(e)})},async loadData(){const [clubs,recruit,acts,notices,dash]=await Promise.all([axios.get('/api/club/byLeader/'+this.user.id),axios.get('/api/recruitment/list'),axios.get('/api/activity/list',{params:this.activityQuery}),axios.get('/api/notice/list'),axios.get('/api/dashboard/stats')]);this.myClubs=clubs.data.data||[];this.recruitments=recruit.data.data||[];this.activities=acts.data.data||{records:[],total:0};this.notices=notices.data.data||[];this.dashboard=dash.data.data||{};this.homeStats=[{label:'我的社团',value:this.myClubs.length},{label:'招新信息',value:this.recruitments.length},{label:'活动数量',value:this.activities.total||0},{label:'公告数量',value:this.notices.length}];this.$nextTick(this.drawChart)},switchPage(p){this.page=p;if(p==='home')this.$nextTick(this.drawChart)},drawChart(){const el=document.getElementById('teacherChart');if(!el||!window.echarts)return;const data=Object.entries(this.dashboard?.clubTypeStats||{}).map(([name,value])=>({name,value}));echarts.init(el).setOption({tooltip:{trigger:'item'},series:[{type:'pie',radius:['45%','70%'],data}]})},searchActivities(){this.activityQuery.page=1;this.loadActivities()},async loadActivities(){const r=await axios.get('/api/activity/list',{params:this.activityQuery});this.activities=r.data.data||{records:[],total:0}},turnActivity(d){this.activityQuery.page+=d;this.loadActivities()},openClubModal(c){this.clubForm=c?{...c}:{clubName:'',clubDescription:'',clubType:'',location:'',contactPhone:'',leaderId:this.user.id,cover:''};this.showClubModal=true},async uploadClubCover(e){const file=e.target.files[0];if(!file)return;const form=new FormData();form.append('file',file);const r=await axios.post('/api/upload/image',form);if(r.data.code===200)this.clubForm.cover=r.data.data.url;else alert(r.data.msg||'上传失败')},async saveClub(){const payload={...this.clubForm};delete payload.cover;if(this.clubForm.id)await axios.put('/api/club/update',payload);else await axios.post('/api/club/add',payload);this.showClubModal=false;this.loadData();alert('保存成功')},async deleteClub(c){if(confirm('确定删除 "'+c.clubName+'"？')){await axios.delete('/api/club/delete/'+c.id);this.loadData()}},openRecruitModal(r){this.recruitForm=r?{...r}:{clubId:'',title:'',content:'',requirement:'',limitCount:0,publisherId:this.user.id};this.showRecruitModal=true},async saveRecruit(){if(this.recruitForm.id)await axios.put('/api/recruitment/update',this.recruitForm);else await axios.post('/api/recruitment/add',this.recruitForm);this.showRecruitModal=false;this.loadData()},async endRecruit(r){await axios.put('/api/recruitment/status/'+r.id+'?status=0');this.loadData()},async deleteRecruit(r){if(confirm('确定删除招新？')){await axios.delete('/api/recruitment/delete/'+r.id);this.loadData()}},openActModal(a){this.actForm=a?{...a}:{clubId:'',activityName:'',description:'',location:'',maxPeople:0,publisherId:this.user.id};this.showActModal=true},async saveAct(){if(this.actForm.id)await axios.put('/api/activity/update',this.actForm);else await axios.post('/api/activity/add',this.actForm);this.showActModal=false;this.loadData()},async deleteAct(a){if(confirm('确定删除活动？')){await axios.delete('/api/activity/delete/'+a.id);this.loadData()}},async publishNotice(){if(!this.noticeForm.title){alert('请填写标题');return}await axios.post('/api/notice/add',{...this.noticeForm,publisherId:this.user.id});this.noticeForm={title:'',content:''};this.loadData()},async deleteNotice(n){if(confirm('确定删除公告？')){await axios.delete('/api/notice/delete/'+n.id);this.loadData()}},async loadMembers(){if(!this.memberClubId)return;const r=await axios.get('/api/member/byClub/'+this.memberClubId);this.members=r.data.data||[]},async changeRole(m){const role=prompt('输入新角色：1普通成员 2干部 3社长',m.memberRole);if(role){await axios.put('/api/member/updateRole/'+m.id+'?memberRole='+role);this.loadMembers()}},async removeMember(m){if(confirm('确定移除该成员？')){await axios.put('/api/member/leave/'+m.id);this.loadMembers()}},async loadApplies(){if(!this.applyClubId)return;const r=await axios.get('/api/apply/byClub/'+this.applyClubId);this.applies=r.data.data||[]},async reviewApply(a,status){await axios.put('/api/apply/review/'+a.id+'?status='+status);this.loadApplies()},roleText(r){return{1:'普通成员',2:'干部',3:'社长'}[r]||'未知'},statusText(s){return{0:'待审核',1:'已通过',2:'已拒绝'}[s]||'未知'},logout(){localStorage.removeItem('token');localStorage.removeItem('user');location.href='login.html'}}}).mount('#app')
+const {createApp} = Vue
+const Pager = {
+    props: ['box', 'query'],
+    emits: ['turn'],
+    template: `<div class="d-flex justify-content-between align-items-center mt-2"><small class="text-muted">共 {{box.total||0}} 条</small><div class="btn-group btn-group-sm"><button class="btn btn-outline-secondary" :disabled="query.page<=1" @click="$emit('turn',-1)">上一页</button><button class="btn btn-outline-secondary disabled">第 {{query.page}} 页</button><button class="btn btn-outline-secondary" :disabled="query.page>=Math.max(1,Math.ceil((box.total||0)/query.pageSize))" @click="$emit('turn',1)">下一页</button></div></div>`
+}
+const ClubSwitcher = {
+    props: ['clubs', 'activeId'],
+    emits: ['select'],
+    template: `<div class="club-switcher"><button v-for="club in clubs" :key="club.id" class="club-tab" :class="{active:String(activeId)===String(club.id)}" @click="$emit('select', club.id)"><strong>{{club.clubName}}</strong><small>{{club.clubType || '未分类'}} · {{club.memberCount || 0}} 人</small></button><div v-if="clubs.length===0" class="empty w-100">你还没有管理任何社团</div></div>`
+}
+
+createApp({
+    components: {Pager, ClubSwitcher},
+    data() {
+        return {
+            user: {}, page: 'home',
+            myClubs: [], recruitments: {records: [], total: 0}, activities: {records: [], total: 0}, notices: [], members: [], applies: [],
+            homeStats: [], activityQuery: {keyword: '', page: 1, pageSize: 6}, recruitQuery: {keyword: '', page: 1, pageSize: 6},
+            memberClubId: '', applyClubId: '',
+            showClubModal: false, clubForm: {},
+            showRecruitModal: false, recruitForm: {},
+            showActModal: false, actForm: {},
+            noticeForm: {title: '', content: ''},
+            charts: {}
+        }
+    },
+    computed: {
+        pendingApplyCount() {
+            return this.applies.filter(apply => apply.status === 0).length
+        }
+    },
+    async mounted() {
+        this.auth()
+        await this.refreshCurrentUser()
+        await this.loadData()
+        window.addEventListener('resize', this.resizeCharts)
+    },
+    unmounted() {
+        window.removeEventListener('resize', this.resizeCharts)
+    },
+    methods: {
+        auth() {
+            const token = localStorage.getItem('token')
+            const user = localStorage.getItem('user')
+            if (!token || !user) {
+                location.href = 'login.html'
+                return
+            }
+            this.user = JSON.parse(user)
+            axios.defaults.headers.common.Authorization = 'Bearer ' + token
+            axios.interceptors.response.use(r => r, e => {
+                if (e.response && e.response.status === 401) {
+                    alert(e.response.data?.msg || '登录已过期，请重新登录')
+                    this.logout()
+                }
+                return Promise.reject(e)
+            })
+        },
+        async refreshCurrentUser() {
+            const res = await axios.get('/api/user/me')
+            if (res.data.code === 200 && res.data.data) {
+                this.user = res.data.data
+                localStorage.setItem('user', JSON.stringify(this.user))
+            }
+        },
+        async loadData() {
+            const [clubs, recruit, acts, notices, dash] = await Promise.all([
+                axios.get('/api/club/byLeader/' + this.user.id),
+                axios.get('/api/recruitment/list', {params: this.recruitQuery}),
+                axios.get('/api/activity/list', {params: this.activityQuery}),
+                axios.get('/api/notice/list'),
+                axios.get('/api/dashboard/stats')
+            ])
+            this.myClubs = clubs.data.data || []
+            this.recruitments = recruit.data.data || {records: [], total: 0}
+            this.activities = acts.data.data || {records: [], total: 0}
+            this.notices = notices.data.data || []
+            this.dashboard = dash.data.data || {}
+            this.homeStats = [
+                {label: '我的社团', value: this.myClubs.length},
+                {label: '招新信息', value: this.recruitments.total || 0},
+                {label: '活动数量', value: this.activities.total || 0},
+                {label: '公告数量', value: this.notices.length}
+            ]
+            if (!this.memberClubId && this.myClubs.length > 0) this.memberClubId = this.myClubs[0].id
+            if (!this.applyClubId && this.myClubs.length > 0) this.applyClubId = this.myClubs[0].id
+            if (this.memberClubId) await this.loadMembers()
+            if (this.applyClubId) await this.loadApplies()
+            this.$nextTick(this.drawChart)
+        },
+        switchPage(page) {
+            this.page = page
+            if (page === 'home') this.$nextTick(this.drawChart)
+        },
+        drawChart() {
+            const el = document.getElementById('teacherChart')
+            if (!el || !window.echarts) return
+            const data = Object.entries(this.dashboard?.clubTypeStats || {}).map(([name, value]) => ({name, value}))
+            if (this.charts.teacherChart) this.charts.teacherChart.dispose()
+            const chart = echarts.init(el)
+            this.charts.teacherChart = chart
+            chart.setOption({
+                tooltip: {trigger: 'item'},
+                legend: {bottom: 0},
+                title: data.length ? undefined : {text: '暂无数据', left: 'center', top: '42%', textStyle: {fontSize: 14, color: '#7b8797'}},
+                series: [{type: 'pie', radius: ['45%', '70%'], center: ['50%', '46%'], data}]
+            })
+        },
+        resizeCharts() {
+            Object.values(this.charts).forEach(chart => chart.resize())
+        },
+        searchActivities() {
+            this.activityQuery.page = 1
+            this.loadActivities()
+        },
+        searchRecruitments() {
+            this.recruitQuery.page = 1
+            this.loadData()
+        },
+        async loadActivities() {
+            const res = await axios.get('/api/activity/list', {params: this.activityQuery})
+            this.activities = res.data.data || {records: [], total: 0}
+        },
+        turnActivity(delta) {
+            this.activityQuery.page = Math.max(1, this.activityQuery.page + delta)
+            this.loadActivities()
+        },
+        turnRecruit(delta) {
+            this.recruitQuery.page = Math.max(1, this.recruitQuery.page + delta)
+            this.loadData()
+        },
+        selectMemberClub(clubId) {
+            this.memberClubId = clubId
+            this.loadMembers()
+        },
+        selectApplyClub(clubId) {
+            this.applyClubId = clubId
+            this.loadApplies()
+        },
+        openClubModal(club) {
+            this.clubForm = club ? {...club} : {clubName: '', clubDescription: '', clubType: '', location: '', contactPhone: '', leaderId: this.user.id}
+            this.showClubModal = true
+        },
+        async saveClub() {
+            if (this.clubForm.id) await axios.put('/api/club/update', this.clubForm)
+            else await axios.post('/api/club/add', this.clubForm)
+            this.showClubModal = false
+            this.loadData()
+            alert('保存成功')
+        },
+        async deleteClub(club) {
+            if (!confirm('确定删除 "' + club.clubName + '"？')) return
+            await axios.delete('/api/club/delete/' + club.id)
+            this.loadData()
+        },
+        openRecruitModal(recruitment) {
+            this.recruitForm = recruitment ? {...recruitment} : {clubId: '', title: '', content: '', requirement: '', limitCount: 0, publisherId: this.user.id}
+            this.showRecruitModal = true
+        },
+        async saveRecruit() {
+            if (this.recruitForm.id) await axios.put('/api/recruitment/update', this.recruitForm)
+            else await axios.post('/api/recruitment/add', this.recruitForm)
+            this.showRecruitModal = false
+            this.loadData()
+        },
+        async endRecruit(recruitment) {
+            await axios.put('/api/recruitment/status/' + recruitment.id + '?status=0')
+            this.loadData()
+        },
+        async deleteRecruit(recruitment) {
+            if (!confirm('确定删除招新？')) return
+            await axios.delete('/api/recruitment/delete/' + recruitment.id)
+            this.loadData()
+        },
+        openActModal(activity) {
+            this.actForm = activity ? {...activity} : {clubId: '', activityName: '', description: '', location: '', maxPeople: 0, publisherId: this.user.id}
+            this.showActModal = true
+        },
+        async saveAct() {
+            if (this.actForm.id) await axios.put('/api/activity/update', this.actForm)
+            else await axios.post('/api/activity/add', this.actForm)
+            this.showActModal = false
+            this.loadData()
+        },
+        async deleteAct(activity) {
+            if (!confirm('确定删除活动？')) return
+            await axios.delete('/api/activity/delete/' + activity.id)
+            this.loadData()
+        },
+        async publishNotice() {
+            if (!this.noticeForm.title) {
+                alert('请填写标题')
+                return
+            }
+            await axios.post('/api/notice/add', {...this.noticeForm, publisherId: this.user.id})
+            this.noticeForm = {title: '', content: ''}
+            this.loadData()
+        },
+        async deleteNotice(notice) {
+            if (!confirm('确定删除公告？')) return
+            await axios.delete('/api/notice/delete/' + notice.id)
+            this.loadData()
+        },
+        async loadMembers() {
+            if (!this.memberClubId) return
+            const res = await axios.get('/api/member/byClub/' + this.memberClubId)
+            this.members = res.data.data || []
+        },
+        async changeRole(member) {
+            const role = prompt('输入新角色：1普通成员 2干部 3社长', member.memberRole)
+            if (!role) return
+            await axios.put('/api/member/updateRole/' + member.id + '?memberRole=' + role)
+            this.loadMembers()
+        },
+        async removeMember(member) {
+            if (!confirm('确定移除该成员？')) return
+            await axios.put('/api/member/leave/' + member.id)
+            this.loadMembers()
+        },
+        async loadApplies() {
+            if (!this.applyClubId) return
+            const res = await axios.get('/api/apply/byClub/' + this.applyClubId)
+            this.applies = res.data.data || []
+        },
+        async reviewApply(apply, status) {
+            await axios.put('/api/apply/review/' + apply.id + '?status=' + status)
+            this.loadApplies()
+        },
+        roleText(role) {
+            return {1: '普通成员', 2: '干部', 3: '社长'}[role] || '未知'
+        },
+        statusText(status) {
+            return {0: '待审核', 1: '已通过', 2: '已拒绝'}[status] || '未知'
+        },
+        applyStatusClass(status) {
+            return {0: 'bg-warning text-dark', 1: 'bg-success', 2: 'bg-danger'}[status] || 'bg-secondary'
+        },
+        formatDate(value) {
+            return value ? String(value).replace('T', ' ') : '-'
+        },
+        goProfile() {
+            window.location.href = 'profile.html'
+        },
+        logout() {
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+            location.href = 'login.html'
+        }
+    }
+}).mount('#app')
 </script>
 </body>
 </html>

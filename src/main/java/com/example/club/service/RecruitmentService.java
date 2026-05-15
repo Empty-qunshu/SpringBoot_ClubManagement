@@ -3,9 +3,11 @@ package com.example.club.service;
 import com.example.club.entity.Recruitment;
 import com.example.club.mapper.RecruitmentMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class RecruitmentService {
@@ -18,6 +20,19 @@ public class RecruitmentService {
 
     public List<Recruitment> findAll() {
         return recruitmentMapper.selectAll();
+    }
+
+    public List<Recruitment> search(String keyword) {
+        List<Recruitment> recruitments = recruitmentMapper.selectAll();
+        if (!StringUtils.hasText(keyword)) return recruitments;
+        String kw = keyword.toLowerCase(Locale.ROOT);
+        return recruitments.stream()
+                .filter(recruitment -> contains(recruitment.getTitle(), kw)
+                        || contains(recruitment.getContent(), kw)
+                        || contains(recruitment.getRequirement(), kw)
+                        || contains(recruitment.getClubId(), kw)
+                        || contains(recruitment.getPublisherId(), kw))
+                .toList();
     }
 
     public Recruitment findById(Integer id) {
@@ -46,5 +61,9 @@ public class RecruitmentService {
 
     public List<Recruitment> findByClubId(Integer clubId) {
         return recruitmentMapper.selectByClubId(clubId);
+    }
+
+    private boolean contains(Object value, String keyword) {
+        return value != null && String.valueOf(value).toLowerCase(Locale.ROOT).contains(keyword);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.club.controller;
 
+import com.example.club.entity.PageResult;
 import com.example.club.entity.Recruitment;
 import com.example.club.entity.Result;
 import com.example.club.service.RecruitmentService;
@@ -26,8 +27,14 @@ public class RecruitmentController {
     }
 
     @GetMapping("/list")
-    public Result list() {
-        return Result.success(recruitmentService.findAll());
+    public Result list(@RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) Integer page,
+                       @RequestParam(required = false) Integer pageSize) {
+        var recruitments = recruitmentService.search(keyword);
+        if (page != null || pageSize != null) {
+            return Result.success(PageResult.of(recruitments, page, pageSize));
+        }
+        return Result.success(recruitments);
     }
 
     @GetMapping("/get/{id}")

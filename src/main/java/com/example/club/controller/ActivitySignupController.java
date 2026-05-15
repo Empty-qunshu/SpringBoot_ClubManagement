@@ -1,6 +1,7 @@
 package com.example.club.controller;
 
 import com.example.club.entity.ActivitySignup;
+import com.example.club.entity.PageResult;
 import com.example.club.entity.Result;
 import com.example.club.service.ActivitySignupService;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin
@@ -24,8 +26,15 @@ public class ActivitySignupController {
     }
 
     @GetMapping("/list")
-    public Result list() {
-        return Result.success(signupService.findAll());
+    public Result list(@RequestParam(required = false) Integer status,
+                       @RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) Integer page,
+                       @RequestParam(required = false) Integer pageSize) {
+        var signups = signupService.search(status, keyword);
+        if (page != null || pageSize != null) {
+            return Result.success(PageResult.of(signups, page, pageSize));
+        }
+        return Result.success(signups);
     }
 
     @PostMapping("/join")

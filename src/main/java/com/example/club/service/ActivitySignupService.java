@@ -5,9 +5,11 @@ import com.example.club.mapper.ActivityMapper;
 import com.example.club.mapper.ActivitySignupMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class ActivitySignupService {
@@ -22,6 +24,21 @@ public class ActivitySignupService {
 
     public List<ActivitySignup> findAll() {
         return signupMapper.selectAll();
+    }
+
+    public List<ActivitySignup> search(Integer status, String keyword) {
+        List<ActivitySignup> signups = signupMapper.selectAll();
+        if (status != null) {
+            signups = signups.stream().filter(signup -> status.equals(signup.getStatus())).toList();
+        }
+        if (!StringUtils.hasText(keyword)) return signups;
+        String kw = keyword.toLowerCase(Locale.ROOT);
+        return signups.stream()
+                .filter(signup -> contains(signup.getId(), kw)
+                        || contains(signup.getActivityId(), kw)
+                        || contains(signup.getUserId(), kw)
+                        || contains(signup.getSignStatus(), kw))
+                .toList();
     }
 
     @Transactional
@@ -60,5 +77,9 @@ public class ActivitySignupService {
 
     public List<ActivitySignup> findByActivityId(Integer activityId) {
         return signupMapper.selectByActivityId(activityId);
+    }
+
+    private boolean contains(Object value, String keyword) {
+        return value != null && String.valueOf(value).toLowerCase(Locale.ROOT).contains(keyword);
     }
 }
