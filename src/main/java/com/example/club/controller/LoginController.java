@@ -1,5 +1,6 @@
 package com.example.club.controller;
 
+import com.example.club.annotation.AnonymousAccess;
 import com.example.club.entity.LoginInfo;
 import com.example.club.entity.Result;
 import com.example.club.entity.User;
@@ -18,6 +19,7 @@ public class LoginController {
         this.userService = userService;
     }
 
+    @AnonymousAccess
     @PostMapping("/login")
     public Result login(@RequestBody User user) {
         log.info("login:{}", user == null ? null : user.getUsername());

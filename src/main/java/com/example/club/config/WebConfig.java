@@ -1,5 +1,6 @@
 package com.example.club.config;
 
+import com.example.club.interceptor.LoginInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -9,22 +10,24 @@ import java.nio.file.Paths;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-    private final JwtInterceptor jwtInterceptor;
+    private final LoginInterceptor loginInterceptor;
+    private final UploadProperties uploadProperties;
 
-    public WebConfig(JwtInterceptor jwtInterceptor) {
-        this.jwtInterceptor = jwtInterceptor;
+    public WebConfig(LoginInterceptor loginInterceptor, UploadProperties uploadProperties) {
+        this.loginInterceptor = loginInterceptor;
+        this.uploadProperties = uploadProperties;
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(jwtInterceptor)
+        registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/api/**")
-                .excludePathPatterns("/login", "/api/user/login", "/api/user/register", "/uploads/**");
+                .excludePathPatterns("/uploads/**");
     }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String uploadPath = Paths.get("uploads").toAbsolutePath().normalize().toUri().toString();
+        String uploadPath = Paths.get(uploadProperties.getPath()).toAbsolutePath().normalize().toUri().toString();
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations(uploadPath);
     }

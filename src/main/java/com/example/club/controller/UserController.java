@@ -1,5 +1,8 @@
 package com.example.club.controller;
 
+import com.example.club.annotation.AnonymousAccess;
+import com.example.club.annotation.RequireRole;
+import com.example.club.context.LoginUserContext;
 import com.example.club.entity.PageResult;
 import com.example.club.entity.Result;
 import com.example.club.entity.User;
@@ -16,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ public class UserController {
         this.userService = userService;
     }
 
+    @AnonymousAccess
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody User user) {
         User result = userService.login(user.getUsername(), user.getPassword());
@@ -48,6 +51,7 @@ public class UserController {
         return res;
     }
 
+    @AnonymousAccess
     @PostMapping("/register")
     public Result register(@RequestBody User user) {
         if (user == null || user.getUsername() == null || user.getUsername().isBlank()
@@ -63,6 +67,7 @@ public class UserController {
     }
 
     @GetMapping("/list")
+    @RequireRole(3)
     public Result list(@RequestParam(required = false) Integer role,
                        @RequestParam(required = false) String keyword,
                        @RequestParam(required = false) Integer page,
@@ -81,8 +86,8 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public Result me(HttpServletRequest request) {
-        Integer loginUserId = (Integer) request.getAttribute("loginUserId");
+    public Result me() {
+        Integer loginUserId = LoginUserContext.getUserId();
         User user = userService.findById(loginUserId);
         return user != null ? Result.success(userService.withoutPassword(user)) : Result.unauthorized("登录用户不存在");
     }
@@ -94,6 +99,7 @@ public class UserController {
     }
 
     @PutMapping("/status/{id}")
+    @RequireRole(3)
     public Result updateStatus(@PathVariable Integer id, @RequestParam Integer status) {
         userService.updateStatus(id, status);
         return Result.success();
@@ -106,12 +112,14 @@ public class UserController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @RequireRole(3)
     public Result delete(@PathVariable Integer id) {
         userService.deleteById(id);
         return Result.success();
     }
 
     @GetMapping("/byRole")
+    @RequireRole(3)
     public Result getByRole(@RequestParam Integer role) {
         return Result.success(userService.withoutPasswords(userService.findByRole(role)));
     }

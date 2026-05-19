@@ -14,3 +14,8 @@ mybatis:
   type-aliases-package: com.example.club.entity
   configuration:
     map-underscore-to-camel-case: true
+
+club:
+  upload:
+    path: uploads
+    max-image-size: 5242880

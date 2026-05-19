@@ -1,6 +1,10 @@
+D:\Ideaworkspace\club-management\src\main\java\com\example\club\annotation\AnonymousAccess.java
+D:\Ideaworkspace\club-management\src\main\java\com\example\club\annotation\RequireRole.java
 D:\Ideaworkspace\club-management\src\main\java\com\example\club\ClubManagementApplication.java
-D:\Ideaworkspace\club-management\src\main\java\com\example\club\config\JwtInterceptor.java
+D:\Ideaworkspace\club-management\src\main\java\com\example\club\config\UploadProperties.java
 D:\Ideaworkspace\club-management\src\main\java\com\example\club\config\WebConfig.java
+D:\Ideaworkspace\club-management\src\main\java\com\example\club\context\LoginUser.java
+D:\Ideaworkspace\club-management\src\main\java\com\example\club\context\LoginUserContext.java
 D:\Ideaworkspace\club-management\src\main\java\com\example\club\controller\ActivityController.java
 D:\Ideaworkspace\club-management\src\main\java\com\example\club\controller\ActivitySignupController.java
 D:\Ideaworkspace\club-management\src\main\java\com\example\club\controller\ClubApplyController.java
@@ -23,6 +27,7 @@ D:\Ideaworkspace\club-management\src\main\java\com\example\club\entity\PageResul
 D:\Ideaworkspace\club-management\src\main\java\com\example\club\entity\Recruitment.java
 D:\Ideaworkspace\club-management\src\main\java\com\example\club\entity\Result.java
 D:\Ideaworkspace\club-management\src\main\java\com\example\club\entity\User.java
+D:\Ideaworkspace\club-management\src\main\java\com\example\club\interceptor\LoginInterceptor.java
 D:\Ideaworkspace\club-management\src\main\java\com\example\club\mapper\ActivityMapper.java
 D:\Ideaworkspace\club-management\src\main\java\com\example\club\mapper\ActivitySignupMapper.java
 D:\Ideaworkspace\club-management\src\main\java\com\example\club\mapper\ClubApplyMapper.java
